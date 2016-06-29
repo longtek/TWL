@@ -1,0 +1,55 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.longtek.bluetooth_control.MainActivity" >
+	
+    <item 
+        android:icon="@drawable/home"
+        android:id="@+id/menu_home"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/Home" />
+    <item
+        android:icon="@drawable/connection"
+        android:id="@+id/menu_connnection"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/Connection" />
+    <item 
+        android:icon="@drawable/demo"
+        android:id="@+id/memu_demo"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/Demo" />
+    <item
+        android:icon="@drawable/boxsettings"
+        android:id="@+id/menu_boxsettings"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/Boxsettings" />
+    <item
+        android:icon="@drawable/can_settings"
+        android:id="@+id/menu_cansettings"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/Cansettings" />
+    <item 
+        android:icon="@drawable/help"
+        android:id="@+id/menu_help"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/Help" />
+    <item 
+        android:icon="@drawable/about"
+        android:id="@+id/menu_about"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/About" />
+    <item 
+        android:icon="@drawable/logs"
+        android:id="@+id/menu_logs"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/Logs"/>
+    
+
+</menu>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SoundCreatorControl1.0.5</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="ConnectToSoundCreator">Connect to SoundCreator</string>
+    <string name="ConnectedTo">Connect to </string>
+    <string name="Boxsettings">BOX files</string>
+    <string name="Home">Home</string>
+    <string name="Connection">Connection</string>
+    <string name="Demo">Quick compare</string>
+    <string name="Cansettings">CAN Settings</string>
+    <string name="Help">Help</string>
+    <string name="About">About</string>
+    <string name="Logs">Logs</string>
+    <string name="NotConnected">NO SoundCreator connected</string>
+	<string name="ConnectionFailed">Error: Connection failed. Please try again.</string>
+	<string name="lastCcgLoaded">Last CAN File loaded:</string>
+	<string name="RPM">RMP:</string>
+	<string name="Speed">Speed:</string>
+	<string name="Throttle">Throttle:</string>
+	<string name="AppliVersion">SoundCreator Control version 1.0</string>
+	<string name="SpyOn">Spy On</string>
+	<string name="SpyOff">Spy Off</string>
+	
+</resources>
