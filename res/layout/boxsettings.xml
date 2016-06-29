@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  	android:orientation="vertical" 
+  	android:layout_width="fill_parent" 
+  	android:layout_height="fill_parent">
+    
+    <RelativeLayout 
+        android:padding="10.0dip" 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content">
+        
+        <Button 
+            android:textColor="@android:color/white" 
+            android:id="@id/ButtonBrowseBoxBox" 
+            android:background="@color/blue" 
+            android:padding="5.0dip" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:text="Add file" />
+        
+        <Button 
+            android:textColor="@android:color/white" 
+            android:id="@id/ButtonDeleteBoxBox" 
+            android:background="@color/blue" 
+            android:padding="5.0dip" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:text="Delete all" 
+            android:layout_alignParentTop="true" 
+            android:layout_alignParentRight="true" />
+    
+    </RelativeLayout>
+    
+    <ListView 
+        android:id="@id/listBoxBox" 
+        android:background="@drawable/listboxselector" 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content" />
+    
+</LinearLayout>

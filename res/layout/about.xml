@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"  
+    android:orientation="vertical" 
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent">
+    
+    <Space 
+        android:layout_width="fill_parent" 
+        android:layout_height="20.0dip" />
+    
+    <ImageView 
+        android:id="@id/imageLogoAbout" 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content" 
+        android:src="@drawable/logo_soundcreator" 
+        android:adjustViewBounds="true" />
+    
+    <Space 
+        android:layout_width="fill_parent" 
+        android:layout_height="40.0dip" />
+    
+    <TextView 
+        android:gravity="center_horizontal" 
+        android:layout_gravity="center_horizontal" 
+        android:id="@id/textAppliVersionAbout" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="@string/AppliVersion" />
+   
+    <Space 
+        android:layout_width="fill_parent" 
+        android:layout_height="20.0dip" />
+    
+    <TextView 
+        android:gravity="center_horizontal" 
+        android:layout_gravity="center_horizontal" 
+        android:id="@id/textConnectedToAbout" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="@string/NotConnected" />
+    
+    <Space 
+        android:layout_width="fill_parent" 
+        android:layout_height="20.0dip" />
+    
+    <TextView 
+        android:gravity="center_horizontal" 
+        android:autoLink="email" 
+        android:layout_gravity="center_horizontal" 
+        android:id="@id/TextContactAbout" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="Contact: support@longtek.fr  " />
+   
+    <TextView 
+        android:gravity="center_horizontal" 
+        android:autoLink="web" 
+        android:layout_gravity="center_horizontal" 
+        android:id="@id/TextWebAbout" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="http://www.longtek.com/" />
+      
+    <Space 
+        android:layout_width="fill_parent" 
+        android:layout_height="20.0dip" />
+    
+    <TextView 
+        android:gravity="center_horizontal" 
+        android:layout_gravity="center_horizontal" 
+        android:id="@id/TextCopyrightAbout" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="© 2014 SoundCreator, All Rights Reserved \n LONGTEK - Domaine du Petit Arbois - BP 69 - 13545 Aix en Provence - Cedex 4 - France" />
+    
+    <TextView 
+        android:gravity="center_horizontal" 
+        android:autoLink="phone" 
+        android:layout_gravity="center_horizontal" 
+        android:id="@id/TextTelAbout" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="Tél : +33 4 42 90 40 00" />
+    
+    <TextView 
+        android:gravity="center_horizontal" 
+        android:layout_gravity="center_horizontal" 
+        android:id="@id/TextFaxAbout" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="Fax : +33 4 42 97 12 88" />
+ 
+</LinearLayout>

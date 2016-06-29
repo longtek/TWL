@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+	 <TextView 
+        android:textAppearance="?android:textAppearanceLarge" 
+        android:id="@id/TextConnectedToConn" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="@string/NotConnected" />
+	  <Space 
+        android:layout_width="fill_parent" 
+        android:layout_height="20.0dip" />
+	  
+	  <RelativeLayout 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content">
+        <Button 
+            android:textColor="@android:color/white" 
+            android:id="@id/DisconnectConn" 
+            android:background="@color/blue" 
+            android:padding="5.0dip" 
+            android:layout_width="wrap_content" 
+            android:layout_height="50.0dip" 
+            android:text="Disconnect" 
+            android:layout_alignParentTop="true" 
+            android:layout_alignParentRight="false" 
+            android:layout_centerInParent="true" />
+        <ImageButton 
+            android:id="@id/RefreshConn" 
+            android:background="@color/blue" 
+            android:layout_width="50.0dip" 
+            android:layout_height="50.0dip" 
+            android:src="@drawable/refresh" />
+        <ProgressBar 
+            android:id="@id/progressBarDeviceDiscoveryConn" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:layout_toRightOf="@id/RefreshConn" 
+            android:layout_centerVertical="true" />
+    </RelativeLayout>
+    
+	  <Space 
+        android:layout_width="fill_parent" 
+        android:layout_height="20.0dip" />
+	  <ListView 
+        android:id="@id/listViewBTDeviceConn" 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content" />
+	 
+</LinearLayout>
