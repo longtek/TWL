@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="ButtonSearch" type="id"/>
+    <item name="TextConnectedToConn" type="id" />
+    <item name="listViewBTDeviceConn" type="id" />
+    <item name="DisconnectConn" type="id" />
+    <item name="RefreshConn" type="id" />
+    <item name="progressBarDeviceDiscoveryConn" type="id" />
+    <item name="textLastCcgFileCan" type="id" />
+    <item name="TextCcgFileCan" type="id" />
+    <item name="ButtonBrowseCcgCan" type="id" />
+    <item name="buttonSpyOnOffCan" type="id" />
+    <item name="tableRow1" type="id" />
+    <item name="TextView01" type="id" />
+    <item name="textViewRPMCan" type="id" />
+    <item name="TextView04" type="id" />
+    <item name="tableRow2" type="id" />
+    <item name="TextView02" type="id" />
+    <item name="textViewSpeedCan" type="id" />
+    <item name="TextView05" type="id" />
+    <item name="tableRow3" type="id" />
+    <item name="TextView03" type="id" />
+    <item name="textViewThrottleCan" type="id" />
+    <item name="TextView06" type="id" />
+    <item name="ButtonBrowseBoxBox" type="id" />
+    <item name="ButtonDeleteBoxBox" type="id" />
+    <item name="listBoxBox" type="id" />
+    <item name="imageLogoAbout" type="id" />
+    <item name="textAppliVersionAbout" type="id" />
+    <item name="textConnectedToAbout" type="id" />
+    <item name="TextContactAbout" type="id" />
+    <item name="TextWebAbout" type="id" />
+    <item name="TextCopyrightAbout" type="id" />
+    <item name="TextTelAbout" type="id" />
+    <item name="TextFaxAbout" type="id" />
+    <item name="buttonBox0Demo" type="id" />
+    <item name="buttonBox1Demo" type="id" />
+    <item name="buttonBox2Demo" type="id" />
+    <item name="buttonBox3Demo" type="id" />
+    <item name="viewflipperHelp" type="id" />
+    <item name="buttonClearLogs" type="id" />
+    <item name="textViewLogs" type="id" />
+    <item name="list_item" type="id" />
+    <item name="icon" type="id" />
+    <item name="title" type="id" />
+</resources>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ 	 android:layout_width="fill_parent" 
+ 	 android:layout_height="fill_parent">
+    
+    <LinearLayout 
+        android:orientation="vertical" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:layout_centerInParent="true">
+        
+        <LinearLayout 
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content">
+            
+            <Button 
+                android:textSize="50.0sp" 
+                android:id="@id/buttonBox0Demo" 
+                android:layout_width="150.0dip" 
+                android:layout_height="150.0dip" 
+                android:layout_margin="5.0dip" 
+                android:text="1" />
+           
+            <Button 
+                android:textSize="50.0sp" 
+                android:id="@id/buttonBox1Demo" 
+                android:layout_width="150.0dip" 
+                android:layout_height="150.0dip" 
+                android:layout_margin="5.0dip" 
+                android:text="2" />
+        </LinearLayout>
+        
+        <LinearLayout 
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content">
+            
+            <Button 
+                android:textSize="50.0sp" 
+                android:id="@id/buttonBox2Demo" 
+                android:layout_width="150.0dip" 
+                android:layout_height="150.0dip"
+                android:layout_margin="5.0dip" 
+                android:text="3" />
+            
+            <Button 
+                android:textSize="50.0sp" 
+                android:id="@id/buttonBox3Demo" 
+                android:layout_width="150.0dip" 
+                android:layout_height="150.0dip" 
+                android:layout_margin="5.0dip" 
+                android:text="4" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
