@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  	android:orientation="vertical" 
+  	android:padding="10.0dip" 
+  	android:layout_width="fill_parent" 
+  	android:layout_height="fill_parent">
+    
+    <LinearLayout 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content">
+        <TextView 
+            android:textAppearance="?android:textAppearanceLarge" 
+            android:id="@id/textLastCcgFileCan" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:text="@string/lastCcgLoaded" />
+        <TextView 
+            android:textAppearance="?android:textAppearanceLarge" 
+            android:id="@id/TextCcgFileCan" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+ 
+    <Space 
+        android:layout_width="fill_parent" 
+        android:layout_height="20.0dip" />
+    
+    <Button 
+        android:textColor="@android:color/white" 
+        android:id="@id/ButtonBrowseCcgCan" 
+        android:background="@color/blue" 
+        android:padding="5.0dip" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="Change CAN settings file" />
+ 
+    <Space 
+        android:layout_width="fill_parent" 
+        android:layout_height="40.0dip" />
+    
+    <ToggleButton 
+        android:id="@id/buttonSpyOnOffCan" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:checked="false" 
+        android:text="Spy On/Off" />
+    
+    <TableLayout 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content" 
+        android:layout_marginEnd="5.0dip">
+        
+        <TableRow 
+            android:id="@id/tableRow1" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content">
+            
+            <TextView 
+                android:textAppearance="?android:textAppearanceLarge" 
+                android:gravity="right" 
+                android:id="@id/TextView01" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:layout_marginRight="5.0dip" 
+                android:text="@string/RPM" />
+            
+            <TextView 
+                android:textAppearance="?android:textAppearanceLarge" 
+                android:id="@id/textViewRPMCan" 
+                android:layout_width="60.0dip" 
+                android:layout_height="wrap_content" />
+            
+            <TextView 
+                android:textAppearance="?android:textAppearanceLarge" 
+                android:id="@id/TextView04" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:layout_marginLeft="5.0dip" 
+                android:text="rpm" />
+        </TableRow>
+        
+        <TableRow 
+            android:id="@id/tableRow2" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content">
+            
+            <TextView 
+                android:textAppearance="?android:textAppearanceLarge" 
+                android:gravity="right" 
+                android:id="@id/TextView02" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:layout_marginRight="5.0dip" 
+                android:text="@string/Speed" />
+            
+            <TextView 
+                android:textAppearance="?android:textAppearanceLarge" 
+                android:id="@id/textViewSpeedCan" 
+                android:layout_width="60.0dip" 
+                android:layout_height="wrap_content" />
+            
+            <TextView 
+                android:textAppearance="?android:textAppearanceLarge" 
+                android:id="@id/TextView05" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:layout_marginLeft="5.0dip" 
+                android:text="km/h" />
+        </TableRow>
+        
+        <TableRow 
+            android:id="@id/tableRow3" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content">
+            
+            <TextView 
+                android:textAppearance="?android:textAppearanceLarge" 
+                android:gravity="right" 
+                android:id="@id/TextView03" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:layout_marginRight="5.0dip" 
+                android:text="@string/Throttle" />
+            
+            <TextView 
+                android:textAppearance="?android:textAppearanceLarge" 
+                android:id="@id/textViewThrottleCan" 
+                android:layout_width="60.0dip" 
+                android:layout_height="wrap_content" />
+            
+            <TextView 
+                android:textAppearance="?android:textAppearanceLarge" 
+                android:id="@id/TextView06" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:layout_marginLeft="5.0dip" 
+                android:text="%" />
+        </TableRow>
+    </TableLayout>
+</LinearLayout>
