@@ -98,21 +98,21 @@ public class Test extends Activity {
 					if(bos[i]==0x0a)
 						n++;
 				}
-//				
-//				byte[] bos_new = new byte[bos.length+n];
-//				n=0;
-//				
-//				for(i=0; i<bos.length; i++){  
-//					if(bos[i]==0x0a){
-//						bos_new[n]=0x0d;
-//						n++;
-//						bos_new[n]=0x0a;
-//					}else{
-//						bos_new[n]=bos[i];
-//					}
-//					n++;
-//				}
-//				
+				
+				byte[] bos_new = new byte[bos.length+n];
+				n=0;
+				
+				for(i=0; i<bos.length; i++){  
+					if(bos[i]==0x0a){
+						bos_new[n]=0x0d;
+						n++;
+						bos_new[n]=0x0a;
+					}else{
+						bos_new[n]=bos[i];
+					}
+					n++;
+				}
+				
 				os.write(bos);
 			} catch (IOException e) {
 				e.printStackTrace();

@@ -76,12 +76,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int ButtonSearch=0x7f070000;
         public static final int ButtonVolume=0x7f070034;
         public static final int DisconnectConn=0x7f070003;
-        public static final int Edit0=0x7f07003e;
+        public static final int Edit0=0x7f070039;
         public static final int ProgressBarVolume=0x7f070031;
         public static final int RefreshConn=0x7f070004;
-        public static final int ScrollView01=0x7f07003c;
-        public static final int SendMsgBtn=0x7f07003f;
-        public static final int Text0=0x7f07003b;
+        public static final int ScrollView01=0x7f070037;
+        public static final int SendMsgBtn=0x7f07003a;
+        public static final int Text0=0x7f070036;
         public static final int TextCcgFileCan=0x7f070007;
         public static final int TextConnectedToConn=0x7f070001;
         public static final int TextContactAbout=0x7f07001c;
@@ -104,12 +104,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int buttonBox3Demo=0x7f070024;
         public static final int buttonClearLogs=0x7f070026;
         public static final int buttonSpyOnOffCan=0x7f070009;
-        public static final int button_cancel=0x7f07003a;
-        public static final int button_scan=0x7f070039;
+        public static final int button_cancel=0x7f07003f;
+        public static final int button_scan=0x7f07003e;
         public static final int icon=0x7f070029;
         public static final int imageLogoAbout=0x7f070019;
         public static final int imagelogoAbout=0x7f07002b;
-        public static final int in=0x7f07003d;
+        public static final int in=0x7f070038;
         public static final int listBoxBox=0x7f070018;
         public static final int listViewBTDeviceConn=0x7f070002;
         public static final int list_item=0x7f070028;
@@ -122,8 +122,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int menu_home=0x7f070040;
         public static final int menu_logs=0x7f070047;
         public static final int menu_test=0x7f070048;
-        public static final int new_devices=0x7f070038;
-        public static final int paired_devices=0x7f070036;
+        public static final int new_devices=0x7f07003d;
+        public static final int paired_devices=0x7f07003b;
         public static final int progressBarDeviceDiscoveryConn=0x7f070005;
         public static final int tableRow1=0x7f07000a;
         public static final int tableRow2=0x7f07000e;
@@ -136,7 +136,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int textViewSpeedCan=0x7f070010;
         public static final int textViewThrottleCan=0x7f070014;
         public static final int title=0x7f07002a;
-        public static final int title_new_devices=0x7f070037;
+        public static final int title_new_devices=0x7f07003c;
         public static final int viewflipperHelp=0x7f070025;
     }
     public static final class layout {

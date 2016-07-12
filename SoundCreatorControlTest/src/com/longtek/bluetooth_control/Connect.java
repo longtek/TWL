@@ -2,6 +2,7 @@ package com.longtek.bluetooth_control;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -13,6 +14,8 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,9 +23,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +49,15 @@ public class Connect extends Activity{
 	boolean bRun = true;
 	boolean bThread = false;
 	
+	private TextView text0; 	   	//提示栏
+    private EditText edit0;    		//发送数据输入框
+    private TextView dis;       	//接收数据显示
+    private ScrollView sv;     		//翻页
+    private String smsg = "";    	//显示用数据缓存
+    private String fmsg = "";    	//保存用数据缓存
+    private Handler handler;
+    private Button SendMsgBtn;
+    
 	private View.OnClickListener OnRefresh = new View.OnClickListener()
 	{
 	    public void onClick(View view)
@@ -159,20 +173,21 @@ public class Connect extends Activity{
     
 	private AdapterView.OnItemClickListener OnChooseBTDevice = new AdapterView.OnItemClickListener()
 	{
-	    public void onItemClick(AdapterView<?> paramAnonymousAdapterView, View paramAnonymousView, int paramAnonymousInt, long paramAnonymousLong)
+	    public void onItemClick(AdapterView<?> AdapterView, View view, int indext, long Long)
 	    {
-	    	Connect.this.Connected(paramAnonymousInt);
+	    	Connect.this.Connected(indext);
 	    }
 	};
+	
 	private BluetoothDevice m_Device;
 	private ArrayList<BluetoothDevice> m_listDevice;
 	private BluetoothAdapter myBluetoothAdapter;
 	private Context m_Connect;
 	private Object m_Thread;
 	
-	public void ConnectionDone(boolean paramBoolean)
+	public void ConnectionDone(boolean Isconnected)
 	{
-	    if (paramBoolean)
+	    if (Isconnected)
 	    {
 	    	setResult(-1);
 	    	ActivityFinish();
@@ -183,16 +198,16 @@ public class Connect extends Activity{
 	    localToast.show();
 	  }
 	
-	public boolean Connected(int paramInt)
+	public boolean Connected(int indext)
 	{
-		BluetoothDevice localBluetoothDevice = this.getDevice(paramInt);
+		BluetoothDevice device = this.getDevice(indext);
 	    if (this.myBluetoothAdapter.isDiscovering())
 	    	this.myBluetoothAdapter.cancelDiscovery();
 	    while (true)
 	    {
 	    	if (!this.myBluetoothAdapter.isDiscovering())
 	    	{
-	    		boolean bool = this.connect(localBluetoothDevice);
+	    		boolean bool = this.connect(device);
 	    		if ((this.m_Connect != null) && (!bool))
 	    			ConnectionDone(false);
 	        return bool;
@@ -201,9 +216,9 @@ public class Connect extends Activity{
 	      {
 	        Thread.sleep(100L);
 	      }
-	      catch (InterruptedException localInterruptedException)
-	      {
-	        localInterruptedException.printStackTrace();
+	      catch (InterruptedException e)
+	      { 
+	    	  e.printStackTrace();
 	      }
 	    }
 	}
@@ -222,7 +237,7 @@ public class Connect extends Activity{
 	          m_socket.close();
 	          return;
 	        }
-	        catch (IOException localIOException)
+	        catch (IOException e)
 	        {
 	        }
 	      }
@@ -242,10 +257,10 @@ public class Connect extends Activity{
 	    return false;
 	}
 	
-	 public boolean connect(BluetoothDevice paramBluetoothDevice)
+	 public boolean connect(BluetoothDevice btDevice)
 	  {
 	    disconnect();
-	    connectclient(paramBluetoothDevice);
+	    connectclient(btDevice);
 	    new Thread(new Runnable()
 	    {
 	      public void run()
@@ -255,15 +270,15 @@ public class Connect extends Activity{
 	          m_socket.connect();
 	          return;
 	        }
-	        catch (IOException localIOException1)
+	        catch (IOException e)
 	        {
-	          localIOException1.printStackTrace();
+	          e.printStackTrace();
 	          try
 	          {
 	            m_socket.close();
 	            return;
 	          }
-	          catch (IOException localIOException2)
+	          catch (IOException ee)
 	          {
 	          }
 	        }
@@ -302,13 +317,12 @@ public class Connect extends Activity{
 	    return false;
 	  }
  
-	public BluetoothDevice getDevice(int paramInt)
+	public BluetoothDevice getDevice(int indext)
 	{
-	    this.m_Device = ((BluetoothDevice)this.m_listDevice.get(paramInt));
+	    this.m_Device = ((BluetoothDevice)this.m_listDevice.get(indext));
 	    return this.m_Device;
 	}
 	
-
     public void HideProgressBar()
 	{
 		this.ProgressDeviceDiscovery.setVisibility(8);
@@ -335,8 +349,8 @@ public class Connect extends Activity{
 		 this.Refresh = (ImageButton) findViewById(R.id.RefreshConn);
 		 this.Disconnect = (Button) findViewById(R.id.DisconnectConn);
 		 this.TextConnectedTo = (TextView) findViewById(R.id.TextConnectedToConn);
-		 this.ProgressDeviceDiscovery = (ProgressBar) findViewById(R.id.progressBarDeviceDiscoveryConn);
-		 this.ListViewBTDevices = (ListView) findViewById(R.id.listViewBTDeviceConn);
+//		 this.ProgressDeviceDiscovery = (ProgressBar) findViewById(R.id.progressBarDeviceDiscoveryConn);
+//		 this.ListViewBTDevices = (ListView) findViewById(R.id.listViewBTDeviceConn);
 	}
 	
 	@Override
@@ -345,12 +359,19 @@ public class Connect extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.connection);
 		
+		 text0 = (TextView)findViewById(R.id.Text0);			
+		 edit0 = (EditText)findViewById(R.id.Edit0);			
+	
+		 SendMsgBtn = (Button) findViewById(R.id.SendMsgBtn);
+	    
+		 //使用Handler在主线程中获取、处理消息    
+		
 		init();
 		
 		this.Refresh.setOnClickListener(this.OnRefresh);
 		this.Disconnect.setOnClickListener(this.OnDisconnect);
-		this.ListViewBTDevices.setAdapter(this.BTArrayAdapter);
-        this.ListViewBTDevices.setOnItemClickListener(this.OnChooseBTDevice);
+//		this.ListViewBTDevices.setAdapter(this.BTArrayAdapter);
+//      this.ListViewBTDevices.setOnItemClickListener(this.OnChooseBTDevice);
 		
 		//如果打开本地蓝牙设备不成功，提示信息，结束程序
         if (btAdapter == null){
@@ -367,6 +388,65 @@ public class Connect extends Activity{
     		   }
     	   }   	   
        }.start();  
+       
+     //创建新的线程，用于接收数据，并使用Handler向主线程中发送消息
+       new Thread(){
+       	
+       	public void run(){
+       		int num = 0;
+       		byte[] buffer = new byte[1024];
+       		byte[] buffer_new = new byte[1024];
+       		int i = 0;
+       		int n = 0;
+       		bRun = true;
+       		//接收线程
+       		while(true){
+       			try{
+       				while(is.available()==0){
+       					while(bRun == false){}
+       				}
+       				while(true){
+       					num = is.read(buffer);         //读入数据
+       					n=0;
+       					
+       					String s0 = new String(buffer,0,num);
+       					fmsg+=s0;    //保存收到数据
+       					System.out.println("收到数据：" + s0);       //--->打印调试信息
+       					
+       					for(i=0;i<num;i++){
+       						if((buffer[i] == 0x0d)&&(buffer[i+1]==0x0a)){
+       							buffer_new[n] = 0x0a;
+       							i++;
+       						}else{
+       							buffer_new[n] = buffer[i];
+       						}
+       						n++;
+       					}
+       					String s = new String(buffer_new,0,n);
+       					smsg+=s;   //写入接收缓存
+       					if(is.available()==0)break;  //短时间没有数据才跳出进行显示
+       					System.out.println("收到数据：" + smsg);          //--->打印调试信息，收到的数据
+       				} 
+       				//在此使用Handler发送消息
+       					handler.sendMessage(handler.obtainMessage());       	    		
+       	    		}catch(IOException e){
+       	    		}
+       		}
+       	}
+       }.start();
+       
+       //消息处理队列
+       Handler handler= new Handler(){
+       	public void handleMessage(Message msg){
+       		super.handleMessage(msg);
+       		dis.setText(smsg);   //显示数据 
+       		sv.scrollTo(0,dis.getMeasuredHeight()); //跳至数据最后一页
+     
+       		sv = (ScrollView)findViewById(R.id.ScrollView01);	
+       		dis = (TextView) findViewById(R.id.in);      		
+       	}
+       };
+       
        
      //判断设备是否连接成功，成功则显示设备的蓝牙名称
 //       if (IsConnected()) {
@@ -531,8 +611,58 @@ public class Connect extends Activity{
 		ActivityFinish();
 	}
 	
-	public void DisconnectionDone(boolean paramBoolean)
+	public void DisconnectionDone(boolean Isconnected)
 	{
 	    this.TextConnectedTo.setText(getString(R.string.NotConnected));
 	}
+	
+	 //发送按键响应
+    public void onSendButtonClicked(View v)
+    {
+    	
+    	int i=0;
+    	int n=0;
+ 
+    		try {
+				OutputStream os = btSocket.getOutputStream();    
+				byte[] bos = edit0.getText().toString().getBytes();
+  	
+				for(i=0; i<bos.length; i++){
+					if(bos[i]==0x0a)
+						n++;
+				}
+				
+				byte[] bos_new = new byte[bos.length+n];
+				n=0;
+				
+				for(i=0; i<bos.length; i++){  
+					if(bos[i]==0x0a){
+						bos_new[n]=0x0d;
+						n++;
+						bos_new[n]=0x0a;
+					}else{
+						bos_new[n]=bos[i];
+					}
+					n++;
+				}
+				
+				os.write(bos);
+				System.out.println("发送数据：" + bos);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}	
+    	 
+    }
+    
+    
+    //关闭程序调用处理部分
+    public void onDestroy(){
+    	super.onDestroy();
+    	if(btSocket!=null)  //关闭连接socket
+    	try{
+    		btSocket.close();
+    	}catch(IOException e){}
+    //	_bluetooth.disable();  //关闭蓝牙服务
+    }
 }
+
