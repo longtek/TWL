@@ -14,14 +14,21 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+/**
+ * BoxSettings类，主要用于操作SD卡上的BOX文件，设置加载到硬件控制盒的文件
+ * @author Administrator
+ *
+ */
 public class BoxSettings extends Activity {
 
 	private ArrayAdapter<String> BoxArrayAdapter;
-	private Button DeleteAllBox;
-	private ListView ListBox;
-	private Button LoadBox;
+	private Button DeleteAllBox;		//删除按钮
+	private ListView ListBox;			//BOX文件列表
+	private Button LoadBox;			//选择BOX文件按钮
 	private Boolean IsBoxLoaded = true;
+	private Fac_Manager m_Manager = null;
 	
+	//Box文件选择按钮单击事件监听器
 	private View.OnClickListener OnLoadBox = new View.OnClickListener()
 	{
 		public void onClick(View view)
@@ -33,11 +40,12 @@ public class BoxSettings extends Activity {
 	    }
 	};
 	
+	//删除按钮响应事件监听器
 	private View.OnClickListener OnDeleteAllBox = new View.OnClickListener()
 	{
 	    public void onClick(View view)
 	    {
-//	      new DialogDelete().show(BoxSettings.this.getSupportFragmentManager(), "DialogDelete");
+//	    	new DialogDelete().show(BoxSettings.this.getSupportFragmentManager(), "DialogDelete");
 	    }
 	};
 	
@@ -91,7 +99,7 @@ public class BoxSettings extends Activity {
 	{
 		
 	}
-	
+	//初始化该类的UI组件
 	public void init()
 	{
 		this.LoadBox = ((Button)findViewById(R.id.ButtonBrowseBoxBox));
@@ -181,9 +189,11 @@ public class BoxSettings extends Activity {
 		
 		return true;
 	}
-
+	
+	//各个子类之间相互跳转函数
 	public void ActivityFinish()
 	{
+		this.m_Manager.deleteBoxSettings();
 		finish();
 	}
 	

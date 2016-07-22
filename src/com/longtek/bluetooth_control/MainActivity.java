@@ -19,6 +19,11 @@ import android.widget.Toast;
 import android.app.Activity;
 import android.app.Dialog;
 
+/**
+ * 应用程序主类
+ * @author TWL
+ *
+ */
 public class MainActivity extends FragmentActivity
 {
 	private Button Connect;
@@ -219,9 +224,9 @@ public class MainActivity extends FragmentActivity
 	    int i = ArrayOfString.length;
 	}
 	
+	//初始化该类下的所有UI组件
 	private void init()
 	{
-		
 		this.Connect = (Button) findViewById(R.id.ButtonConnect);
 		this.Search = ((ImageButton)findViewById(R.id.ButtonSearch));
 		this.Next = ((ImageButton)findViewById(R.id.ButtonNext));
@@ -313,9 +318,6 @@ public class MainActivity extends FragmentActivity
 				case R.id.menu_logs:
 					Launch_Logs();
 					break;
-				case R.id.menu_test:
-					Launch_Test();
-					break;
 				default:
 					return super.onOptionsItemSelected(item);		//对没有处理的事件交给父类处理
 				}
@@ -362,11 +364,6 @@ public class MainActivity extends FragmentActivity
 	public void Launch_About()
 	{
 		startActivity(new Intent(this, About.class));
-	}
-	
-	public void Launch_Test()
-	{
-		startActivity(new Intent(this, Test.class));
 	}
  
 	@Override

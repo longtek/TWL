@@ -40,9 +40,9 @@ public class Fac_Manager
 	private Fac_Handler m_handler = null;
 	private BluetoothAdapter myBluetoothAdapter;
   
-	public Fac_Manager(Context paramContext)
+	public Fac_Manager(Context context)
 	{
-		this.m_context = paramContext;
+		this.m_context = context;
 		this.m_Data = new PC_Data();
 		this.bReceiver = new Fac_BroadcastReceiver(this);
 		this.m_handler = new Fac_Handler(this);
@@ -60,11 +60,12 @@ public class Fac_Manager
 		m_UniqueInstance = this;
 	}
   
-	private int ByteToInt(byte paramByte)
+	//将byte类型转换为整型
+	private int ByteToInt(byte b)
   	{
-		ByteBuffer localByteBuffer = ByteBuffer.wrap(new byte[] { paramByte, 0, 0, 0 });
-		localByteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-		return localByteBuffer.getInt();
+		ByteBuffer bb = ByteBuffer.wrap(new byte[] { b, 0, 0, 0 });
+		bb.order(ByteOrder.LITTLE_ENDIAN);
+		return bb.getInt();
   	}
   
 	public static Fac_Manager getManager()
@@ -185,7 +186,7 @@ public class Fac_Manager
     	{
     		boolean bool = this.m_com.connect(localBluetoothDevice);
     		if ((this.m_Connect != null) && (!bool)) {
-    			((Connect)this.m_Connect).ConnectionDone(false);
+//    			((Connect)this.m_Connect).ConnectionDone(false);
     		}
     		return bool;
     	}
@@ -204,7 +205,7 @@ public class Fac_Manager
   {
 	  String str = new String(paramArrayOfByte);
 	  if (this.m_Connect != null) {
-		  ((Connect)this.m_Connect).ConnectionDone(paramArrayOfByte.equals("y"));
+//		  ((Connect)this.m_Connect).ConnectionDone(paramArrayOfByte.equals("y"));
 	  }
 	  ((MainActivity)this.m_context).ConnectionDone(paramArrayOfByte.equals("y"));
 	  if (paramArrayOfByte.equals("y")) {
@@ -242,7 +243,7 @@ public class Fac_Manager
   public void DiscoveryFinished()
   {
 	  if (this.m_Connect != null) {
-		  ((Connect)this.m_Connect).HideProgressBar();
+//		  ((Connect)this.m_Connect).HideProgressBar();
 	  }
   }
   
@@ -336,7 +337,7 @@ public class Fac_Manager
   {
 	  this.m_Data.addDevice(BtDevice);
 	  if (this.m_Connect != null) {
-		  ((Connect)this.m_Connect).NewDeviceDetected(BtDevice);
+//		  ((Connect)this.m_Connect).NewDeviceDetected(BtDevice);
 	  }
   }
   
@@ -362,7 +363,7 @@ public class Fac_Manager
 	  this.m_com.LoadBoxCmd();
   }
   
-  public byte[] ReadCcgFile(File paramFile)
+  public byte[] ReadCcgFile(File file)
   {
 	  Object localObject2 = null;
 	  int i = 0;
@@ -371,7 +372,7 @@ public class Fac_Manager
 	  
 	  try
 	  {
-		  FileReader fileReder = new FileReader(paramFile);
+		  FileReader fileReder = new FileReader(file);
 	//	  localObject1 = fileReader;
 	  }
     catch (FileNotFoundException e)
@@ -472,7 +473,7 @@ public class Fac_Manager
       String str;
   
     //  continue;
-      byte[] arrayOfByte = ReadCcgV1(paramFile);
+      byte[] arrayOfByte = ReadCcgV1(file);
  
     }
   }
@@ -622,7 +623,7 @@ public class Fac_Manager
     this.m_Data.setM_ListBox(null);
     ((MainActivity)this.m_context).ConnectionDone(false);
     if (this.m_Connect != null) {
-      ((Connect)this.m_Connect).DisconnectionDone(true);
+//      ((Connect)this.m_Connect).DisconnectionDone(true);
     }
   }
   

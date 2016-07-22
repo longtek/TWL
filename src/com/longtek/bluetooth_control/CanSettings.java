@@ -1,10 +1,17 @@
 package com.longtek.bluetooth_control;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,39 +21,104 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+/**
+ * CanSettings类，用于选择发送Ccg文件，显示控制盒回传的CAN数据（RPM、Speed、Throttle）
+ * @author TWL
+ * */
 public class CanSettings extends Activity {
 
-	private Button CANSettings;
-	private TextView CanRPM;
-	private	TextView CanSpeed;
-	private TextView CanThrottle;
+	private Button CANSettings;			//设置CAN配置文件按钮
+	private TextView CanRPM;			//发动机转速
+	private	TextView CanSpeed;			//车速
+	private TextView CanThrottle;		//油门开度
 	private TextView CcgFile;
-	private ToggleButton m_SpyOnOff;
+	private ToggleButton m_SpyOnOff;		//数据开关
 	
-	public static final int REQUEST_CODE = 1000;    //选择文件   请求码
+	private Fac_Manager m_Manager;
+	public static final int REQUEST_CODE = 1000;    //选择文件 请求码
 	public static final String SEND_FILE_NAME = "sendFileName";
 
+	//创建CAN设置按钮点击响应事件监听器
 	private View.OnClickListener OnCANSettings = new View.OnClickListener() {
 		
 		@Override
 		public void onClick(View view) {
+			//读取手机存储，选取需要加载的Ccg文件
 			Intent intent= new Intent("android.intent.action.GET_CONTENT");
 		    intent.setType("*/*");
 		    intent.addCategory("android.intent.category.OPENABLE");
 		    CanSettings.this.startActivityForResult(Intent.createChooser(intent, "Choose Ccg file"), 1000);
+		 
+		}
+	}; 
+
+	//创建数据显示开关点击响应事件监听器
+	  private View.OnClickListener OnSpyOnOff = new View.OnClickListener() {
+		
+		@Override
+		public void onClick(View arg0) {
+			// TODO Auto-generated method stub
+			if(!CanSettings.this.m_Manager.IsConnected())
+			{
+				((MainActivity) CanSettings.this.m_Manager.getM_Connect()).PleaseDoConnection();
+				CanSettings.this.m_SpyOnOff.setChecked(false);
+				return ;
+			}
+			if (CanSettings.this.m_SpyOnOff.isChecked())
+			{
+				CanSettings.this.m_Manager.SpyOn();
+				return ;
+			}
+			CanSettings.this.m_Manager.SpyOff();
 		}
 	};
+	
+	public String read()
+	{
+		try {
+			//如果手机插入了SD卡，而且应用程序具有访问SD的权限
+			if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+				//获取SD卡对应的存储目录
+				File sdCardDir = Environment.getExternalStorageDirectory();
+				System.out.println("----------------" + sdCardDir);
+				//获取指定文件的对应输入流
+				FileInputStream fis = new FileInputStream(
+						sdCardDir.getCanonicalPath() + SEND_FILE_NAME);
+				//将指定输入流包装成BufferedReader
+				BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+				StringBuffer sb = new StringBuffer("");
+				String line = null;
+				//循环读取文件内容
+				while((line = br.readLine()) != null)
+				{
+					sb.append(line);
+				}
+				//关闭资源
+				br.close();
+				return sb.toString();
+			}
+		} /*catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/ catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
 	private String m_CcgName;
 	
-	public void CcgFlashed(boolean paramBoolean)
+	public void CcgFlashed(boolean isConnected)
 	{
-		if (paramBoolean)
+		if (isConnected)
 	    {
 			this.CcgFile.setText(this.getCcgFileName());
-			Toast.makeText(this, 2131361824, 0).show();
+			Toast.makeText(this, R.string.TransferComplete, 0).show();
 			return;
 	    }
-	    Toast.makeText(this, 2131361825, 1).show();
+	    Toast.makeText(this, R.string.TransferFailed, 1).show();
 	}
 	
 	public CharSequence getCcgFileName()
@@ -59,13 +131,13 @@ public class CanSettings extends Activity {
 		return this.m_CcgName;
 	}
 	 
-	public void CcgLoaded(boolean paramBoolean)
+	public void CcgLoaded(boolean isConnected)
 	{
 	}
 	
-	public void SpyOnOff(boolean paramBoolean)
+	public void SpyOnOff(boolean isConnected)
 	{
-		if (paramBoolean)
+		if (isConnected)
 	    {
 			Toast.makeText(this, "Spy On", 1).show();
 			this.m_SpyOnOff.setBackgroundColor(-16711936);
@@ -78,16 +150,16 @@ public class CanSettings extends Activity {
 	    this.CanThrottle.setText("");
 	}
 	
-	public void UpdateRPMSpeedThrottle(int paramInt1, int paramInt2, int paramInt3)
+	public void UpdateRPMSpeedThrottle(int RPM, int Speed, int Throttle)
 	{
-		String str = String.format("%d", new Object[] { Integer.valueOf(paramInt1) });
-	    this.CanRPM.setText(str);
-	    str = String.format("%d", new Object[] { Integer.valueOf(paramInt2) });
-	    this.CanSpeed.setText(str);
-	    str = String.format("%d", new Object[] { Integer.valueOf(paramInt3) });
-	    this.CanThrottle.setText(str);
+		String rpm = String.format("%d", new Object[] { Integer.valueOf(RPM) });
+	    this.CanRPM.setText(rpm);
+	    String speed = String.format("%d", new Object[] { Integer.valueOf(Speed) });
+	    this.CanSpeed.setText(speed);
+	    String throttle = String.format("%d", new Object[] { Integer.valueOf(Throttle) });
+	    this.CanThrottle.setText(throttle);
 	}
-	
+	//初始化该Activity的全部UI组件
 	public void init()
 	{
 		this.CANSettings = (Button) findViewById(R.id.ButtonBrowseCcgCan);
@@ -110,7 +182,9 @@ public class CanSettings extends Activity {
 	{
 		finish();
 	}
-	
+	/**
+	 * 以下是各个类间相互跳转函数
+	 * */
 	public void Launch_Connection()
 	{
 		startActivity(new Intent(this, Connect.class));
@@ -159,6 +233,13 @@ public class CanSettings extends Activity {
 		
 		init();
 		this.CANSettings.setOnClickListener(this.OnCANSettings);
+		this.m_SpyOnOff.setOnClickListener(OnSpyOnOff);
+		this.m_Manager = Fac_Manager.getManager();
+		
+		   
+		//读取选择的Ccg文件
+		System.out.println(SEND_FILE_NAME);
+		Log.i("选取文件的内容", read());
 	}
 	
 	@Override
@@ -237,14 +318,41 @@ public class CanSettings extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		//请求码和结果码同时为REQUEST_CODE时，处理特定的结果
-		if(requestCode == 1000 & resultCode == 1000){
-			//请求为 "选择文件"
-			try {
-				//取得选择的文件名
-				String CcgFileName = data.getStringExtra(SEND_FILE_NAME);
-				CcgFile.setText(CcgFileName);
-			} catch (Exception e) {				
+//		if(requestCode == 1000 & resultCode == 1000){
+//			//请求为 "选择文件"
+//			try {
+//				//取得选择的文件名
+//				String CcgFileName = data.getStringExtra(SEND_FILE_NAME);
+//				CcgFile.setText(CcgFileName);
+//			} catch (Exception e) {				
+//			}
+//		}	
+		
+		if(requestCode != -1)
+		{
+			switch(requestCode)
+			{
+			case 1000:
+				Uri uri = getIntent().getData();
+				if (!uri.getPath().substring(uri.getPath().lastIndexOf(".") + 1).equals("ccg"))     //截取uri中的最后一个“.”后面为“ccg‘的内容
+				{
+					Toast toast = Toast.makeText(this, "Error: Please select a .ccg file", 1);
+					toast.setGravity(17, 0, 0);
+					toast.show();
+					return;
+				}
+				this.m_Manager.LoadCcg(uri);
+				
+				//请求为 "选择文件"
+				try {
+					//取得选择的文件名
+					String CcgFileName = data.getStringExtra(SEND_FILE_NAME);
+					CcgFile.setText(CcgFileName);
+				} catch (Exception e) {	
+					 e.printStackTrace();  
+				}
+				break;
 			}
-		}	
+		}
 	}
 }

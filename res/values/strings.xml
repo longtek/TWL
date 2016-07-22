@@ -18,7 +18,7 @@
     <string name="NotConnected">NO SoundCreator connected</string>
 	<string name="ConnectionFailed">Error: Connection failed. Please try again.</string>
 	<string name="lastCcgLoaded">Last CAN File loaded:</string>
-	<string name="RPM">RMP:</string>
+	<string name="RPM">RPM:</string>
 	<string name="Speed">Speed:</string>
 	<string name="Throttle">Throttle:</string>
 	<string name="AppliVersion">SoundCreator Control version 1.0</string>

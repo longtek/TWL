@@ -20,16 +20,22 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
 
+/**
+ * DeviceListActivity类
+ * 用于开启蓝牙服务查找，注册广播显示搜索得到的蓝牙列表，选择连接设备
+ * @author TWL
+ *
+ */
 public class DeviceListActivity extends Activity {
-    // 调试用
-    private static final String TAG = "DeviceListActivity";
+    // 标识，用于在Log中显示，调试用
+    private static final String TAG = "DeviceListActivity";        
     private static final boolean D = true;
 
     // 返回时数据标签
     public static String EXTRA_DEVICE_ADDRESS = "设备地址";
 
-    // 成员域
-    private BluetoothAdapter mBtAdapter;
+    // 成员域，蓝牙适配器
+    private BluetoothAdapter mBtAdapter;         
     private ArrayAdapter<String> mPairedDevicesArrayAdapter;
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
 
@@ -39,7 +45,7 @@ public class DeviceListActivity extends Activity {
 
         // 创建并显示窗口
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);  //设置窗口显示模式为窗口方式
-        setContentView(R.layout.device_list);
+        setContentView(R.layout.device_list);			//设置界面布局
 
         // 设定默认返回值为取消
         setResult(Activity.RESULT_CANCELED);
@@ -170,7 +176,8 @@ public class DeviceListActivity extends Activity {
                 // 如果是已配对的则略过，已得到显示，其余的在添加到列表中进行显示
                 if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
                     mNewDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-                }else{  //添加到已配对设备列表
+                }else{  
+                	//添加到已配对设备列表
                 	mPairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
                 }
             // 搜索完成action
