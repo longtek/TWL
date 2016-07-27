@@ -3,6 +3,8 @@ package com.longtek.bluetooth_control;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
@@ -37,7 +39,8 @@ public class CanSettings extends Activity {
 	private Fac_Manager m_Manager;
 	public static final int REQUEST_CODE = 1000;    //选择文件 请求码
 	public static final String SEND_FILE_NAME = "sendFileName";
-
+	private static final String BASEDIR = "SoundCreator";
+	
 	//创建CAN设置按钮点击响应事件监听器
 	private View.OnClickListener OnCANSettings = new View.OnClickListener() {
 		
@@ -47,8 +50,7 @@ public class CanSettings extends Activity {
 			Intent intent= new Intent("android.intent.action.GET_CONTENT");
 		    intent.setType("*/*");
 		    intent.addCategory("android.intent.category.OPENABLE");
-		    CanSettings.this.startActivityForResult(Intent.createChooser(intent, "Choose Ccg file"), 1000);
-		 
+		    CanSettings.this.startActivityForResult(Intent.createChooser(intent, "Choose Ccg file"), REQUEST_CODE);
 		}
 	}; 
 
@@ -72,6 +74,26 @@ public class CanSettings extends Activity {
 			CanSettings.this.m_Manager.SpyOff();
 		}
 	};
+	
+	/* public static String read(String name) {
+	        File sdcard = Environment.getExternalStorageDirectory();
+	        String sdcardPath = sdcard.getPath();
+	        File file = new File(sdcardPath + "/"+BASEDIR+"/" + name + ".ccg");
+	        StringBuilder text = new StringBuilder();
+	        try {
+	            BufferedReader br = new BufferedReader(new FileReader(file));
+	            String line;
+	            while ((line = br.readLine()) != null) {
+	                text.append(line);
+	                text.append('\n');
+	            }
+	            br.close();
+	            return text.toString();
+	        }
+	        catch (IOException e) {
+	            return e.getMessage();
+	        }
+	    }*/
 	
 	public String read()
 	{
@@ -97,14 +119,13 @@ public class CanSettings extends Activity {
 				br.close();
 				return sb.toString();
 			}
-		} /*catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/ catch (IOException e) {
+		}catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		return null;
 	}
 	
@@ -152,12 +173,12 @@ public class CanSettings extends Activity {
 	
 	public void UpdateRPMSpeedThrottle(int RPM, int Speed, int Throttle)
 	{
-		String rpm = String.format("%d", new Object[] { Integer.valueOf(RPM) });
-	    this.CanRPM.setText(rpm);
-	    String speed = String.format("%d", new Object[] { Integer.valueOf(Speed) });
-	    this.CanSpeed.setText(speed);
-	    String throttle = String.format("%d", new Object[] { Integer.valueOf(Throttle) });
-	    this.CanThrottle.setText(throttle);
+		String rpm1 = String.format("%d", new Object[] { Integer.valueOf(RPM) });
+	    this.CanRPM.setText(rpm1);
+	    String speed1 = String.format("%d", new Object[] { Integer.valueOf(Speed) });
+	    this.CanSpeed.setText(speed1);
+	    String throttle1 = String.format("%d", new Object[] { Integer.valueOf(Throttle) });
+	    this.CanThrottle.setText(throttle1);
 	}
 	//初始化该Activity的全部UI组件
 	public void init()
@@ -183,7 +204,7 @@ public class CanSettings extends Activity {
 		finish();
 	}
 	/**
-	 * 以下是各个类间相互跳转函数
+	 * 以下是各个子菜单之间相互跳转的函数
 	 * */
 	public void Launch_Connection()
 	{
@@ -313,7 +334,7 @@ public class CanSettings extends Activity {
 				
 	}
 	/**
-	 * 6月21日 changed，返回选择Ccg文件的结果
+	 * Activity回调函数，用于返回选择Ccg文件的结果
 	 * */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

@@ -31,6 +31,7 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 /**
  * Connect类
@@ -41,7 +42,7 @@ import android.widget.Toast;
  */
 public class Connect extends Activity {
 	
-	private final static int REQUEST_CONNECT_DEVICE = 1;    //宏定义查询设备句柄
+	private final static int REQUEST_CONNECT_DEVICE = 1;    //请求码
 	
 	private final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";   //SPP服务UUID号
 	
@@ -53,9 +54,16 @@ public class Connect extends Activity {
     private String smsg = ""; 	 //显示用数据缓存
     private String fmsg = ""; 	 //保存用数据缓存
     private Button Disconnect;	
-    
+    private ToggleButton m_SpyOnOff;		//数据显示开关
+    private TextView CanRPM; 		//发送机转速
+    private TextView CanSpeed;    	//车速
+    private TextView CanThrottle;	//油门开度
+
     private Fac_Manager m_Manager = null;
 
+    public String rmp;
+    public String speed;
+    public String throttle;
     public String filename=""; //用来保存存储的文件名
     BluetoothDevice _device = null;     //蓝牙设备
     BluetoothSocket _socket = null;      //蓝牙通信socket
@@ -91,19 +99,50 @@ public class Connect extends Activity {
 		}
 	};
 	
-    /** Called when the activity is first created. */
+	//创建数据显示开关点击响应事件监听器
+	  private View.OnClickListener OnSpyOnOff = new View.OnClickListener() {
+		
+		@Override
+		public void onClick(View arg0) {
+			// TODO Auto-generated method stub
+			if(!Connect.this.m_Manager.IsConnected())
+			{
+				((MainActivity) Connect.this.m_Manager.getM_Connect()).PleaseDoConnection();
+				Connect.this.m_SpyOnOff.setChecked(false);
+				return ;
+			}
+			if (Connect.this.m_SpyOnOff.isChecked())
+			{
+				Connect.this.m_Manager.SpyOn();
+				return ;
+			}
+			Connect.this.m_Manager.SpyOff();
+		}
+	};
+	
+	//初始化该Activity的全部UI组件
+	public void init()
+	{
+		Disconnect = (Button) findViewById(R.id.DisconnectConn);
+		this.CanRPM = (TextView) findViewById(R.id.textViewRPMCan);
+		this.CanSpeed = (TextView) findViewById(R.id.textViewSpeedCan);
+		this.CanThrottle = (TextView) findViewById(R.id.textViewThrottleCan);
+		this.m_SpyOnOff = (ToggleButton) findViewById(R.id.buttonSpyOnOffCan);
+		this.m_SpyOnOff.setTextOff(getResources().getString(R.string.SpyOff));
+		this.m_SpyOnOff.setTextOn(getResources().getString(R.string.SpyOn));
+		this.m_SpyOnOff.setChecked(false);
+	}
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.connection); 		  //设置画面为主画面 main.xml
-        
-        //text0 = (TextView)findViewById(R.id.Text0);		  //得到提示栏句柄
-        edit0 = (EditText)findViewById(R.id.Edit0);  		 //得到输入框句柄
-        sv = (ScrollView)findViewById(R.id.ScrollView01);	  //得到翻页句柄
-        dis = (TextView) findViewById(R.id.in);     		 //得到数据显示句柄
-        Disconnect = (Button) findViewById(R.id.DisconnectConn);
+        setContentView(R.layout.connection); 		  
+       
+        init();       //加载该类中的UI控件
         
         this.Disconnect.setOnClickListener(this.OnDisconnect);
+        this.m_SpyOnOff.setOnClickListener(this.OnSpyOnOff);
+        
        //如果打开本地蓝牙设备不成功，提示信息，结束程序
         if (_bluetooth == null){
         	Toast.makeText(this, "无法打开手机蓝牙，请确认手机是否有蓝牙功能！", Toast.LENGTH_LONG).show();
@@ -193,7 +232,9 @@ public class Connect extends Activity {
             			return;
             		}
             		if(bThread==false){
-            			ReadThread.start();
+            			//开启读取数据的工作线程
+//            			ReadThread.start();
+            			thread.start();
             			bThread=true;
             		}else{
             			bRun = true;
@@ -237,12 +278,54 @@ public class Connect extends Activity {
     					}
     					String s = new String(buffer_new,0,n);
     					smsg+=s;   //写入接收缓存
+    					
     					if(is.available()==0)break;  //短时间没有数据才跳出进行显示
     				}
+    				
+ //   				System.out.println(smsg);
+    				
     				//发送显示消息，进行显示刷新
-    					handler.sendMessage(handler.obtainMessage());       	    		
+    				
+    				try {
+						ReadThread.sleep(200);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+    				
+    				//使用Handler发送信息
+    				Message message = handler.obtainMessage();
+    				handler.sendMessage(message);    
+    					
+    					
     	    		}catch(IOException e){
     	    		}
+    		}
+    	}
+    };
+    
+   //新建一个线程实时的发送数据
+    Thread thread = new Thread()
+    {
+    	public void run()
+    	{
+    		String [] Buffer = {"R1000S15T10E", "R1500S20T15E", "R2000S25T20E", "R2500S30T25E", "R3000S35T30E", "R3500S40T35E", "R4000S4550T40E", "R4500S60T45E", "R5000S80T50E", "R6000S100T60E"};
+    		int i;
+    		for(i=0; i < 10; i++)
+    		{
+    			smsg = Buffer[i];
+    			System.out.println(smsg);
+    		
+    			try {
+    				thread.sleep(2000);
+    			} catch (InterruptedException e) {
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    			}
+        		//发送信息
+        		Message m = handler.obtainMessage();
+        		handler.sendMessage(m);
+        		
     		}
     	}
     };
@@ -251,8 +334,18 @@ public class Connect extends Activity {
     Handler handler= new Handler(){
     	public void handleMessage(Message msg){
     		super.handleMessage(msg);
-    		dis.setText(smsg);   //显示数据 
-    		sv.scrollTo(0,dis.getMeasuredHeight()); //跳至数据最后一页
+    		 
+    		//处理数据，截取转速，车速，油门开度
+    		rmp = smsg.substring(smsg.indexOf('R')+1, smsg.indexOf('S'));
+//    			CanRPM.setText(" ");
+    		CanRPM.setText(rmp); 	  	//显示转速
+    			
+    		speed = smsg.substring(smsg.indexOf('S')+1, smsg.indexOf('T'));
+    		CanSpeed.setText(speed);	//显示车速
+    		
+    		throttle = smsg.substring(smsg.indexOf('T')+1, smsg.indexOf('E'));
+     		CanThrottle.setText(throttle);//显示油门开度
+    		
     	}
     };
     
@@ -448,6 +541,30 @@ public class Connect extends Activity {
 	{
 		startActivity(new Intent(this, Demo.class));
 		ActivityFinish();
+	}
+
+	public String getRmp() {
+		return rmp;
+	}
+
+	public void setRmp(String rmp) {
+		this.rmp = rmp;
+	}
+
+	public String getSpeed() {
+		return speed;
+	}
+
+	public void setSpeed(String speed) {
+		this.speed = speed;
+	}
+
+	public String getThrottle() {
+		return throttle;
+	}
+
+	public void setThrottle(String throttle) {
+		this.throttle = throttle;
 	}
 	
     /*//保存功能实现

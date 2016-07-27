@@ -151,7 +151,7 @@ public class DeviceListActivity extends Activity {
 
             // 得到mac地址
             String info = ((TextView) v).getText().toString();
-            String address = info.substring(info.length() - 17);
+            String address = info.substring(info.length() - 17);  		//#################
 
             // 设置返回数据
             Intent intent = new Intent();
@@ -170,7 +170,7 @@ public class DeviceListActivity extends Activity {
             String action = intent.getAction();
 
             // 查找到设备action
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {				//#######################
                 // 得到蓝牙设备
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // 如果是已配对的则略过，已得到显示，其余的在添加到列表中进行显示

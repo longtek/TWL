@@ -21,6 +21,7 @@ import android.app.Dialog;
 
 /**
  * 应用程序主类
+ * 
  * @author TWL
  *
  */
@@ -47,15 +48,21 @@ public class MainActivity extends FragmentActivity
 	private static final int LAUNCHCANSETTINGS = 4;
 	private static final int LAUNCHBOXSETTINGS = 5;
 	protected static final int BLUETOOTH_ACTIVATION = 0;
+	private static final int Vol = 0;
+	private static final BluetoothDevice  BTdevice = null;
+	public boolean Isconnected;
 	
+	
+	//创建蓝牙连接点击事件监听器
 	private View.OnClickListener OnRefresh = new View.OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
-			MainActivity.this.Launch_Connection();
+			MainActivity.this.Launch_Connection();      //从主界面进入蓝牙连接界面
 		}
 	};
 
+	//创建断开按钮单击事件监听器
 	private View.OnClickListener OnDisconnect = new View.OnClickListener() {
 		
 		@Override
@@ -64,7 +71,7 @@ public class MainActivity extends FragmentActivity
 			MainActivity.this.m_Manager.disconnect();
 		}
 	};
-	
+	//创建向上切换文件点击事件
 	private View.OnClickListener OnPrevious = new View.OnClickListener() {
 		
 		@Override
@@ -73,7 +80,7 @@ public class MainActivity extends FragmentActivity
 			MainActivity.this.m_Manager.Previous();
 		}
 	};
-	
+	//BOX文件浏览窗口
 	private View.OnClickListener OnSearch = new View.OnClickListener() {
 		
 		@Override
@@ -87,7 +94,7 @@ public class MainActivity extends FragmentActivity
 			new DialogBox().show(MainActivity.this.getSupportFragmentManager(), "DialogBox");
 		}
 	};
-	
+	//向下切换文件点击事件
 	private View.OnClickListener OnNext = new View.OnClickListener() {
 		
 		@Override
@@ -95,7 +102,7 @@ public class MainActivity extends FragmentActivity
 			MainActivity.this.m_Manager.Next();
 		}
 	};
-	
+	//加音量
 	private View.OnClickListener OnVolPlus = new View.OnClickListener() {
 		
 		@Override
@@ -104,7 +111,7 @@ public class MainActivity extends FragmentActivity
 			MainActivity.this.m_Manager.VolPlus();
 		}
 	};
-	
+	//减音量
 	private View.OnClickListener OnVolMoins = new View.OnClickListener() {
 		
 		@Override
@@ -113,7 +120,7 @@ public class MainActivity extends FragmentActivity
 			MainActivity.this.m_Manager.VolMoins();
 		}
 	};
-	
+	//声音开发按钮
 	private View.OnClickListener OnVolumeOn = new View.OnClickListener() {
 		
 		@Override
@@ -123,11 +130,10 @@ public class MainActivity extends FragmentActivity
 		}
 	};
 	
-	
-	//音量键操作
-	public void BoxMuted(boolean paramBoolean)
+	//音量进度条颜色显示
+	public void BoxMuted(boolean Boolean)
 	{
-		if (paramBoolean)
+		if (Isconnected)
 	    {
 			this.VolumeOn.setImageResource(R.drawable.volumemuted);
 			this.VolumeOn.setBackgroundColor(getResources().getColor(R.color.red));
@@ -138,74 +144,87 @@ public class MainActivity extends FragmentActivity
 	    this.VolumeOn.setBackgroundColor(getResources().getColor(R.color.blue));
 	    this.Volume.setEnabled(true);
 	}
-
-	public void ConnectionDone(boolean paramBoolean)
+/**
+ *蓝牙连接状态函数
+ *显示当前连接的蓝牙设备，清空扫描到的蓝牙列表
+ *@param  boolean Isconnected
+ **/
+	public void ConnectionDone(boolean Boolean)
 	{
-		if (paramBoolean)
+		if (Isconnected)
 	    {
-			this.Connect.setBackgroundColor(-16711936);
+			this.Connect.setBackgroundColor(-16711936);       //颜色值未定
 			String str = getString(R.string.ConnectedTo) + this.m_Manager.getM_Data().getM_Device().getName();
 			this.Connect.setText(str);
 			CleanBTArrayAdapter();
 			return;
 	    }
-	    this.Connect.setBackgroundResource(17301508);
+	    this.Connect.setBackgroundResource(17301508);		 //颜色值未定
 	    this.Connect.setText(R.string.ConnectToSoundCreator);
 	    Clean_NBox();
 	    updateVolume(0);
 	}
 	
+	//清空蓝牙列表
 	private boolean CleanBTArrayAdapter()
 	{
 		this.BTArrayAdapter = new ArrayAdapter(this, 17367043);
 	    return true;
 	}
 
+	//清空BOX文件显示对话框
 	public void Clean_NBox()
 	{
 		this.NBox.setText("");
 	}
 	
+	//更新当前BOX文件
 	public void updateNBox(int Int)
 	{
 		this.NBox.setText("Currently playing: " + this.m_Manager.getM_Data().getM_ListBox()[Int] + ".box");
 	}
 	
-	public void updateVolume(int paramInt)
+	//同步当前音量
+	public void updateVolume(int Int)
 	{
-		if (paramInt >= 0)
+		if (Vol >= 0)
 	    {
 			this.Volume.setIndeterminate(false);
-			this.Volume.setProgress((int)(Math.log10(paramInt / 100) / Math.log10(655.0D) * this.Volume.getMax()));
-			String str = String.format("%d", new Object[] { Integer.valueOf((int)Math.round(20.0D * Math.log10(paramInt / 65535.0F))) }) + " dB";
-			this.TextVolume.setText(str);
+			this.Volume.setProgress((int)(Math.log10(Vol / 100) / Math.log10(655.0D) * this.Volume.getMax()));
+			//格式化音量大小
+			String str = String.format("%d", new Object[] { Integer.valueOf((int)Math.round(20.0D * Math.log10(Vol / 65535.0F))) }) + " dB";
+			this.TextVolume.setText(str);				//显示字符串内容
 			return;
 	    }
 	    this.Volume.setIndeterminate(true);
-	    this.TextVolume.setText(" ");
+	    this.TextVolume.setText(" ");		//如果当前处于静音，数据置空
 	}
-	
-	public void Debug(int paramInt)
+
+	public void Debug(int Int)
 	{
 		
 	}
 	
-	public String DeviceToString(BluetoothDevice paramBluetoothDevice)
+	/**
+	 *蓝牙设备转字符串类型
+	 *显示设备名称和moc地址 
+	 **/
+	public String DeviceToString(BluetoothDevice device)
 	{
-	    return paramBluetoothDevice.getName() + "\n" + paramBluetoothDevice.getAddress();
+	    return BTdevice.getName() + "\n" + BTdevice.getAddress();
 	}
-	
-	public void NewDeviceDetected(BluetoothDevice paramBluetoothDevice)
+	//显示新检测到的设备
+	public void NewDeviceDetected(BluetoothDevice device)
 	{
-	    appendBTArrayAdapter(DeviceToString(paramBluetoothDevice));
+	    appendBTArrayAdapter(DeviceToString(BTdevice));
 	}
-	
-	public boolean appendBTArrayAdapter(String paramString)
+	//追加新检测到的设备
+	public boolean appendBTArrayAdapter(String string)
 	{
-	    this.BTArrayAdapter.add(paramString);
+	    this.BTArrayAdapter.add(DeviceToString(BTdevice));
 	    return true;
 	}
-	
+
 	public void Error()
 	{
 		
@@ -218,10 +237,10 @@ public class MainActivity extends FragmentActivity
 	    toast.setGravity(17, 0, 0);
 	    toast.show();
 	}
-	
+	//有效的BOX文件列表
 	public void BoxListAvailable(String[] ArrayOfString)
 	{
-	    int i = ArrayOfString.length;
+	    int i = ArrayOfString.length;			//字符串长度，即可用的BOX文件数
 	}
 	
 	//初始化该类下的所有UI组件
@@ -247,10 +266,10 @@ public class MainActivity extends FragmentActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_main);         //显示程序主界面布局
 		
-		init();
-		
+		init();        //加载UI组件
+		//执行各组件的点击事件
 		this.Connect.setOnClickListener(this.OnRefresh);
  		this.Search.setOnClickListener(this.OnSearch);
  		this.Previous.setOnClickListener(this.OnPrevious);
@@ -258,6 +277,8 @@ public class MainActivity extends FragmentActivity
  		this.Plus.setOnClickListener(this.OnVolPlus);
  		this.Moins.setOnClickListener(this.OnVolMoins);
  		this.VolumeOn.setOnClickListener(this.OnVolumeOn);
+ 		
+ 		
 	}
 
 	@Override
@@ -325,7 +346,11 @@ public class MainActivity extends FragmentActivity
 				
 	}
 	
-	
+	/**
+	 * 各个类启动函数
+	 * @since   2016.5
+	 * @exception  从主类功能跳转到其他类
+	 * */
 	public void GoHome()
 	{
 		
@@ -366,6 +391,13 @@ public class MainActivity extends FragmentActivity
 		startActivity(new Intent(this, About.class));
 	}
  
+	/**
+	 * 系统回调函数
+	 * 从主类MainActivity中启动的其他类返回的结果，都会在此方法中处理
+	 * @param	int requestCode  请求码
+	 * 			int resultCode   结果码
+	 * 			Intent data		启动意图
+	 * */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 	   
@@ -398,7 +430,7 @@ public class MainActivity extends FragmentActivity
 	   
 	    }
 	}  
-	
+	//对话框提示用户连接蓝牙设备
 	public void PleaseDoConnection()
 	{
 	    Toast toast = Toast.makeText(this, R.string.PleaseDoConnection, 1);

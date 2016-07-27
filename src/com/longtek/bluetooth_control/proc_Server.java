@@ -53,6 +53,7 @@ public class proc_Server extends Thread
 		this.m_stopThread = true;
 	}
   
+	//
 	public void copyToMessage(byte[] ArrayOfByte, int paramInt)
 	{
 		int i = 0;

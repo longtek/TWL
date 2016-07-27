@@ -627,6 +627,7 @@ public class Fac_Manager
     }
   }
   
+  //提取BOX文件列表
   public void extractBoxList(byte[] ArrayOfByte)
   {
 	  int j = ArrayOfByte[0];
@@ -653,6 +654,7 @@ public class Fac_Manager
 	  }
   }
   
+  //取出当前BOX文件
   public void extractNBox(byte[] ArrayOfByte)
   {
 	  int i = this.m_Data.getM_BoxCurrent();
