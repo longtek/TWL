@@ -36,11 +36,11 @@
             android:label="BluetoothConnection"
             android:theme="@style/AppTheme"/>
         <activity
-            android:name="com.longtek.bluetooth_control.DeviceListActivity"
+            android:name=".DeviceListActivity"
             android:label="DeviceListShow"
             android:theme="@style/AppTheme" />
         <activity
-            android:name="com.longtek.bluetooth_control.CanSettings" 
+            android:name=".CanSettings" 
             android:label="CAN Settings"
             android:theme="@style/AppTheme"/>
         <activity

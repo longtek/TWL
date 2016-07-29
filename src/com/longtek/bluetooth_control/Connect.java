@@ -42,6 +42,7 @@ import android.widget.ToggleButton;
  */
 public class Connect extends Activity {
 	
+	private TextView TextConnectedTo;
 	private final static int REQUEST_CONNECT_DEVICE = 1;    //请求码
 	
 	private final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";   //SPP服务UUID号
@@ -60,7 +61,8 @@ public class Connect extends Activity {
     private TextView CanThrottle;	//油门开度
 
     private Fac_Manager m_Manager = null;
-
+	private PC_Data m_Data = null;
+	
     public String rmp;
     public String speed;
     public String throttle;
@@ -123,7 +125,8 @@ public class Connect extends Activity {
 	//初始化该Activity的全部UI组件
 	public void init()
 	{
-		Disconnect = (Button) findViewById(R.id.DisconnectConn);
+		this.TextConnectedTo = (TextView) findViewById(R.id.TextConnectedToConn);
+		this.Disconnect = (Button) findViewById(R.id.DisconnectConn);
 		this.CanRPM = (TextView) findViewById(R.id.textViewRPMCan);
 		this.CanSpeed = (TextView) findViewById(R.id.textViewSpeedCan);
 		this.CanThrottle = (TextView) findViewById(R.id.textViewThrottleCan);
@@ -141,7 +144,7 @@ public class Connect extends Activity {
         init();       //加载该类中的UI控件
         
         this.Disconnect.setOnClickListener(this.OnDisconnect);
-        this.m_SpyOnOff.setOnClickListener(this.OnSpyOnOff);
+//        this.m_SpyOnOff.setOnClickListener(this.OnSpyOnOff);
         
        //如果打开本地蓝牙设备不成功，提示信息，结束程序
         if (_bluetooth == null){
@@ -157,9 +160,27 @@ public class Connect extends Activity {
         		_bluetooth.enable();
     		   }
     	   }   	   
-       }.start();      
+       }.start();    
+       
+//       if (this.IsConnected()) {
+//           this.TextConnectedTo.setText(getString(R.string.ConnectedTo) + this.m_Manager.getM_Data().getM_Device().getName());
+//       }
     }
 
+    public boolean IsConnected()
+    {
+    	return (this._socket != null) && (this._socket.isConnected());
+    }
+    
+    public PC_Data getM_Data()
+    {
+  	  return this.m_Data;
+    }
+    
+    public BluetoothDevice getM_Device()
+    {
+		  return this._device;
+    }
     //发送按键响应
     public void onSendButtonClicked(View v){
     	int i=0;
@@ -208,10 +229,13 @@ public class Connect extends Activity {
                 }
                 //连接socket
             	Button btn = (Button) findViewById(R.id.DisconnectConn);
+            	TextView tv = (TextView) findViewById(R.id.TextConnectedToConn);
                 try{
                 	_socket.connect();
                 	Toast.makeText(this, "连接"+_device.getName()+"成功！", Toast.LENGTH_SHORT).show();
                 	btn.setText("断开");
+                	tv.setText("connected to SoundCreator BT-06");
+//                	tv.setText(getString(R.string.ConnectedTo) + this.m_Manager.getM_Data().getM_Device().getName());
                 }catch(IOException e){
                 	try{
                 		Toast.makeText(this, "连接失败！", Toast.LENGTH_SHORT).show();
@@ -232,9 +256,17 @@ public class Connect extends Activity {
             			return;
             		}
             		if(bThread==false){
+            			
+            			
+            			try {
+    						ReadThread.sleep(200);
+    					} catch (InterruptedException e) {
+    						// TODO Auto-generated catch block
+    						e.printStackTrace();
+    					}
             			//开启读取数据的工作线程
-//            			ReadThread.start();
-            			thread.start();
+            			ReadThread.start();
+//            			thread.start();
             			bThread=true;
             		}else{
             			bRun = true;
@@ -250,11 +282,12 @@ public class Connect extends Activity {
     	
     	public void run(){
     		int num = 0;
-    		byte[] buffer = new byte[1024];
-    		byte[] buffer_new = new byte[1024];
+    		byte[] buffer = new byte[256];
+    		byte[] buffer_new = new byte[256];
     		int i = 0;
     		int n = 0;
     		bRun = true;
+    		
     		//接收线程
     		while(true){
     			try{
@@ -262,11 +295,14 @@ public class Connect extends Activity {
     					while(bRun == false){}
     				}
     				while(true){
+    					
+    					Thread.sleep(200);
+    					
     					num = is.read(buffer);         //读入数据
     					n=0;
-    					
+    					smsg = "";
     					String s0 = new String(buffer,0,num);
-    					fmsg+=s0;    //保存收到数据
+    					fmsg =s0;    //保存收到数据
     					for(i=0;i<num;i++){
     						if((buffer[i] == 0x0d)&&(buffer[i+1]==0x0a)){
     							buffer_new[n] = 0x0a;
@@ -277,28 +313,23 @@ public class Connect extends Activity {
     						n++;
     					}
     					String s = new String(buffer_new,0,n);
-    					smsg+=s;   //写入接收缓存
+    					smsg +=s;   //写入接收缓存
     					
     					if(is.available()==0)break;  //短时间没有数据才跳出进行显示
     				}
     				
- //   				System.out.println(smsg);
+    				System.out.println(smsg);
     				
     				//发送显示消息，进行显示刷新
     				
-    				try {
-						ReadThread.sleep(200);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+    				
     				
     				//使用Handler发送信息
     				Message message = handler.obtainMessage();
     				handler.sendMessage(message);    
     					
     					
-    	    		}catch(IOException e){
+    	    		}catch(IOException | InterruptedException e){
     	    		}
     		}
     	}
@@ -317,7 +348,7 @@ public class Connect extends Activity {
     			System.out.println(smsg);
     		
     			try {
-    				thread.sleep(2000);
+    				Thread.sleep(2000);
     			} catch (InterruptedException e) {
     				// TODO Auto-generated catch block
     				e.printStackTrace();
@@ -336,8 +367,8 @@ public class Connect extends Activity {
     		super.handleMessage(msg);
     		 
     		//处理数据，截取转速，车速，油门开度
+    		
     		rmp = smsg.substring(smsg.indexOf('R')+1, smsg.indexOf('S'));
-//    			CanRPM.setText(" ");
     		CanRPM.setText(rmp); 	  	//显示转速
     			
     		speed = smsg.substring(smsg.indexOf('S')+1, smsg.indexOf('T'));
@@ -352,10 +383,10 @@ public class Connect extends Activity {
     //关闭程序掉用处理部分
     public void onDestroy(){
     	super.onDestroy();
-    	if(_socket!=null)  //关闭连接socket
-    	try{
-    		_socket.close();
-    	}catch(IOException e){}
+//    	if(_socket!=null)  //关闭连接socket
+//    	try{
+//    		_socket.close();
+//    	}catch(IOException e){}
     //	_bluetooth.disable();  //关闭蓝牙服务
     }
     
@@ -481,7 +512,7 @@ public class Connect extends Activity {
 		case R.id.menu_about:
 			Launch_About();
 			break;
-		case R.id.memu_demo:
+		case R.id.menu_demo:
 			Launch_Demo();
 			break;
 		default:

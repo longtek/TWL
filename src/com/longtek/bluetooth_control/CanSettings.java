@@ -254,13 +254,13 @@ public class CanSettings extends Activity {
 		
 		init();
 		this.CANSettings.setOnClickListener(this.OnCANSettings);
-		this.m_SpyOnOff.setOnClickListener(OnSpyOnOff);
+//		this.m_SpyOnOff.setOnClickListener(OnSpyOnOff);         //存在异常
 		this.m_Manager = Fac_Manager.getManager();
 		
 		   
 		//读取选择的Ccg文件
-		System.out.println(SEND_FILE_NAME);
-		Log.i("选取文件的内容", read());
+//		System.out.println(SEND_FILE_NAME);
+//		Log.i("选取文件的内容", read());
 	}
 	
 	@Override
@@ -309,7 +309,7 @@ public class CanSettings extends Activity {
 				case R.id.menu_connnection:
 					Launch_Connection();
 					break;
-				case R.id.memu_demo:
+				case R.id.menu_demo:
 					Launch_Demo();
 					break;
 				case R.id.menu_boxsettings:

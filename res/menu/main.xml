@@ -16,7 +16,7 @@
         android:title="@string/Connection" />
     <item 
         android:icon="@drawable/demo"
-        android:id="@+id/memu_demo"
+        android:id="@+id/menu_demo"
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/Demo" />

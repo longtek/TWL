@@ -321,7 +321,7 @@ public class MainActivity extends FragmentActivity
 				case R.id.menu_connnection:
 					Launch_Connection();
 					break;
-				case R.id.memu_demo:
+				case R.id.menu_demo:
 					Launch_Demo();
 					break;
 				case R.id.menu_boxsettings:

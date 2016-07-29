@@ -87,6 +87,9 @@ public class Help extends Activity {
 		case R.id.menu_connnection:
 			Launch_Connection();
 			break;
+		case R.id.menu_demo:
+			Launch_Demo();
+			break;
 		case R.id.menu_cansettings:
 			Launch_CanSettings();
 			break;

@@ -121,7 +121,7 @@ public class Demo extends Activity {
 		case R.id.menu_boxsettings:
 			Launch_BoxSettings();
 			break;
-		case R.id.memu_demo:
+		case R.id.menu_demo:
 			Launch_Demo();
 			break;
 		case R.id.menu_logs:

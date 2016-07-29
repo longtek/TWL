@@ -159,7 +159,7 @@ public class Logs extends Activity{
 		case R.id.menu_about:
 			Launch_About();
 			break;
-		case R.id.memu_demo:
+		case R.id.menu_demo:
 			Launch_Demo();
 			break;
 		default:
