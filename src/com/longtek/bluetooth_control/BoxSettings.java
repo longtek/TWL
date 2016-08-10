@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -28,6 +29,8 @@ public class BoxSettings extends Activity {
 	private Boolean IsBoxLoaded = true;
 	private Fac_Manager m_Manager = null;
 	
+	private String CcgFileName;
+	private String path;
 	//Box文件选择按钮单击事件监听器
 	private View.OnClickListener OnLoadBox = new View.OnClickListener()
 	{
@@ -242,5 +245,31 @@ public class BoxSettings extends Activity {
 		startActivity(new Intent(this, Demo.class));
 		ActivityFinish();
 	}
+
+	/***
+	 * 回调OnActivityResult方法，返回访问手机存储后，选取的文件结果
+	 * 
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		if(requestCode == RESULT_OK){
+			
+			Uri uri = data.getData();
+			Log.d("Uri == ", uri.toString());
+			path = uri.getPath();
+			
+			if(!path.substring(path.lastIndexOf(".") + 1).equals("box")){
+				
+				Toast toast = Toast.makeText(this, "Error: please select a .box file", 1);
+				toast.setGravity(17, 0, 0);
+				toast.show();
+			}
+		}
+	}
+	
+	
 	
 }

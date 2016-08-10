@@ -144,10 +144,10 @@ public class Connect extends Activity {
         init();       //加载该类中的UI控件
         
         this.Disconnect.setOnClickListener(this.OnDisconnect);
-//        this.m_SpyOnOff.setOnClickListener(this.OnSpyOnOff);
+//        this.m_SpyOnOff.setOnClickListener(this.OnSpyOnOff);				//存在点击异常
         
        //如果打开本地蓝牙设备不成功，提示信息，结束程序
-        if (_bluetooth == null){
+       if (_bluetooth == null){
         	Toast.makeText(this, "无法打开手机蓝牙，请确认手机是否有蓝牙功能！", Toast.LENGTH_LONG).show();
             finish();
             return;
@@ -160,7 +160,7 @@ public class Connect extends Activity {
         		_bluetooth.enable();
     		   }
     	   }   	   
-       }.start();    
+       }.start();   
        
 //       if (this.IsConnected()) {
 //           this.TextConnectedTo.setText(getString(R.string.ConnectedTo) + this.m_Manager.getM_Data().getM_Device().getName());
@@ -234,7 +234,7 @@ public class Connect extends Activity {
                 	_socket.connect();
                 	Toast.makeText(this, "连接"+_device.getName()+"成功！", Toast.LENGTH_SHORT).show();
                 	btn.setText("断开");
-                	tv.setText("connected to SoundCreator BT-06");
+                	tv.setText("connected to BT-06");
 //                	tv.setText(getString(R.string.ConnectedTo) + this.m_Manager.getM_Data().getM_Device().getName());
                 }catch(IOException e){
                 	try{
@@ -257,7 +257,7 @@ public class Connect extends Activity {
             		}
             		if(bThread==false){
             			
-            			
+            			//延时
             			try {
     						ReadThread.sleep(200);
     					} catch (InterruptedException e) {
@@ -282,27 +282,29 @@ public class Connect extends Activity {
     	
     	public void run(){
     		int num = 0;
-    		byte[] buffer = new byte[256];
-    		byte[] buffer_new = new byte[256];
+    		byte[] buffer = new byte[1024];
+    		byte[] buffer_new = new byte[1024];
     		int i = 0;
     		int n = 0;
     		bRun = true;
     		
     		//接收线程
     		while(true){
+    			
     			try{
     				while(is.available()==0){
     					while(bRun == false){}
     				}
     				while(true){
-    					
+    					//接收数据缓存时，加入延时
     					Thread.sleep(200);
     					
     					num = is.read(buffer);         //读入数据
     					n=0;
-    					smsg = "";
+     					smsg = "";
     					String s0 = new String(buffer,0,num);
-    					fmsg =s0;    //保存收到数据
+     					fmsg = s0;
+//    					fmsg +=s0;    //保存收到数据
     					for(i=0;i<num;i++){
     						if((buffer[i] == 0x0d)&&(buffer[i+1]==0x0a)){
     							buffer_new[n] = 0x0a;
@@ -320,16 +322,12 @@ public class Connect extends Activity {
     				
     				System.out.println(smsg);
     				
-    				//发送显示消息，进行显示刷新
-    				
-    				
-    				
-    				//使用Handler发送信息
+    				//使用Handler发送信息,进行显示刷新
     				Message message = handler.obtainMessage();
     				handler.sendMessage(message);    
     					
-    					
     	    		}catch(IOException | InterruptedException e){
+    	    			System.out.println("未收到数据");
     	    		}
     		}
     	}

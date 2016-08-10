@@ -1,5 +1,7 @@
 package com.longtek.bluetooth_control;
 
+import java.util.Set;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -30,7 +32,7 @@ public class DeviceListActivity extends Activity {
     // 标识，用于在Log中显示，调试用
     private static final String TAG = "DeviceListActivity";        
     private static final boolean D = true;
-
+    private BluetoothDevice device;
     // 返回时数据标签
     public static String EXTRA_DEVICE_ADDRESS = "设备地址";
 
@@ -47,18 +49,21 @@ public class DeviceListActivity extends Activity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);  //设置窗口显示模式为窗口方式
         setContentView(R.layout.device_list);			//设置界面布局
 
+        TextView ptv = (TextView) findViewById(R.id.title_paired_devices);
+        TextView ntv = (TextView) findViewById(R.id.title_new_devices);
+        
         // 设定默认返回值为取消
         setResult(Activity.RESULT_CANCELED);
 
-        // 扫描按钮响应
-        Button scanButton = (Button) findViewById(R.id.button_scan);
+        // 查找设备响应
+      /*  Button scanButton = (Button) findViewById(R.id.button_scan);
         scanButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 doDiscovery();
                 v.setVisibility(View.GONE);
             }
-        });
-
+        });*/
+        
         // 初使化设备存储数组
         mPairedDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
         mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
@@ -85,18 +90,18 @@ public class DeviceListActivity extends Activity {
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // 得到已配对蓝牙设备列表
-        //Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
+        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
 
         // 添加已配对设备到列表并显示 
-//        if (pairedDevices.size() > 0) {
-//            findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
-//            for (BluetoothDevice device : pairedDevices) {
-//                mPairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-//            }
-//        } else {
-//            String noDevices = "No devices have been paired";
-//            mPairedDevicesArrayAdapter.add(noDevices);
-//        }
+        if (pairedDevices.size() > 0) {
+//            ptv.setVisibility(View.VISIBLE);
+            for (BluetoothDevice device : pairedDevices) {
+                mPairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+            }
+        } else {
+            String noDevices = "No devices have been paired";
+            mPairedDevicesArrayAdapter.add(noDevices);
+        }
         
       //判断设备是否连接成功，成功则显示设备的蓝牙名称
 //        if (IsConnected()) {
@@ -134,7 +139,7 @@ public class DeviceListActivity extends Activity {
 
         // 显示其它设备（未配对设备）列表
         findViewById(R.id.title_new_devices).setVisibility(View.VISIBLE);
-
+       
         // 关闭再进行的服务查找
         if (mBtAdapter.isDiscovering()) {
             mBtAdapter.cancelDiscovery();
@@ -151,7 +156,7 @@ public class DeviceListActivity extends Activity {
 
             // 得到mac地址
             String info = ((TextView) v).getText().toString();
-            String address = info.substring(info.length() - 17);  		//#################
+            String address = info.substring(info.length() - 17);  		//截取字符串
 
             // 设置返回数据
             Intent intent = new Intent();
@@ -188,8 +193,9 @@ public class DeviceListActivity extends Activity {
                     String noDevices = "没有找到新设备";
                     mNewDevicesArrayAdapter.add(noDevices);
                 }
-//                if(mPairedDevicesArrayAdapter.getCount() > 0)
-//                	findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
+               if(mPairedDevicesArrayAdapter.getCount() > 0)
+//                	findViewById(R.id.title_new_devices).setVisibility(View.VISIBLE);
+            	   mNewDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
             }
         }
     };

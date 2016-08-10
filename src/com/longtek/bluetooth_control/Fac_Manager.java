@@ -49,11 +49,11 @@ public class Fac_Manager
 		this.m_com = new Fac_com(this.m_handler);
 		this.myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		//检查本地蓝牙是否打开
-		if (!this.myBluetoothAdapter.isEnabled())
-		{
-			this.myBluetoothAdapter.enable();
-			Log.d("Fac_Manager", "Bluetooth non activé");
-		}
+//		if (!this.myBluetoothAdapter.isEnabled())
+//		{
+//			this.myBluetoothAdapter.enable();
+//			Log.d("Fac_Manager", "Bluetooth non activé");
+//		}
 		//调用registerReceiver函数注册广播接收器，实现扫描蓝牙设备和返回发现的设备
 		this.m_context.registerReceiver(this.bReceiver, new IntentFilter("android.bluetooth.device.action.FOUND"));
 		this.m_context.registerReceiver(this.bReceiver, new IntentFilter("android.bluetooth.adapter.action.DISCOVERY_FINISHED"));
@@ -174,7 +174,7 @@ public class Fac_Manager
 		this.m_Data.clearDevices();
 	}
   
-	public boolean Connect(int paramInt)
+	/*public boolean Connect(int paramInt)
 	{
 		BluetoothDevice localBluetoothDevice = this.m_Data.getDevice(paramInt);
 		if (this.myBluetoothAdapter.isDiscovering()) {
@@ -200,7 +200,7 @@ public class Fac_Manager
     	}
     }
   }
-  
+  */
   public void ConnectionDone(byte[] paramArrayOfByte)
   {
 	  String str = new String(paramArrayOfByte);
@@ -325,9 +325,9 @@ public class Fac_Manager
 		  return;
 	  }
 	  
-	  File localFile = new File(uri.getPath());
+	  File CcgFile = new File(uri.getPath());
 	  this.m_Data.setM_CcgName(uri.getLastPathSegment());
-	  byte[] ccg = ReadCcgFile(localFile);         	//将读到的CGG文件存在数组中
+	  byte[] ccg = ReadCcgFile(CcgFile);         	//将读到的CGG文件存在数组中
 	  this.m_Data.setM_CcgBytes(ccg);				//将存放在数组中的文件转为字节码
 	  this.m_com.sendCcgCmd();
   }
@@ -374,88 +374,14 @@ public class Fac_Manager
 	  {
 		  FileReader fileReder = new FileReader(file);
 	//	  localObject1 = fileReader;
-	  }
-    catch (FileNotFoundException e)
-    {
-      try
-      {
+
+
         for (;;)
         {
         	Object localObject3 = null;
           String str = ((BufferedReader)localObject3).readLine();
-          if (str == null)
-          {
-            return (byte[]) localObject2;
- //           localFileNotFoundException = localFileNotFoundException;
-     //       e.printStackTrace();
-          }
-          else
-          {
-            localObject1 = localObject2;
-            if (str != null)
-            {
-              localObject1 = localObject2;
-              if (str.length() > 0)
-              {
-                str = str.trim();
-                localObject1 = localObject2;
-                if (str != null)
-                {
-                  localObject1 = localObject2;
-                  if (str.length() > 0)
-                  {
-                    localObject1 = localObject2;
-                    if (!str.substring(0, 1).equals("*"))
-                    {
-                      localObject1 = localObject2;
-                      if (!str.substring(0, 1).equals("\n"))
-                      {
-                        localObject1 = localObject2;
-                        if (!str.substring(0, 1).equals(""))
-                        {
-                          m = j + 1;
-                          j = m;
-                          localObject1 = localObject2;
-                          if (m == 2)
-                          {
-                            localObject1 = new Scanner(str);
-                            k = i;
-                            if (str.getBytes()[0] == "V".getBytes()[0])
-                            {
-                              k = i;
-                              if (str.getBytes()[1] == "_".getBytes()[0]) {
-                                k = Integer.parseInt(str.replaceAll("[^0-9]", ""));
-                              }
-                            }
-                            ((Scanner)localObject1).close();
-                            try
-                            {
-                              ((Closeable) e).close();
-                              switch (k)
-                              {
-                              default: 
-                                localObject1 = null;
-                                j = m;
-                                i = k;
-                              }
-                            }
-                            catch (IOException localIOException)
-                            {
-                              for (;;)
-                              {
-                                localIOException.printStackTrace();
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
         }
+
 //        byte[] arrayOfByte = ReadCcgV0(paramFile);
       }
       catch (IOException paramFile1)
@@ -464,20 +390,6 @@ public class Fac_Manager
         return (byte[]) localObject2;
       }
     }
-    BufferedReader localObject3 = new BufferedReader((Reader)localObject1);
-    
-    localObject1 = localObject2;
-    for (;;)
-    {
-      localObject2 = localObject1;
-      String str;
-  
-    //  continue;
-      byte[] arrayOfByte = ReadCcgV1(file);
- 
-    }
-  }
-  
   /* Error */
   public byte[] ReadCcgV0(File paramFile)
   {

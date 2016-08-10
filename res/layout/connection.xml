@@ -28,18 +28,18 @@
             android:layout_alignParentTop="true" 
             android:layout_alignParentRight="false" 
             android:layout_centerInParent="true" />
-        <ImageButton 
+    	<ImageButton 
             android:id="@id/RefreshConn" 
             android:background="@color/blue" 
             android:layout_width="50.0dip" 
             android:layout_height="50.0dip" 
             android:src="@drawable/refresh" />
-        <ProgressBar 
+      	<!-- <ProgressBar 
             android:id="@id/progressBarDeviceDiscoveryConn" 
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
             android:layout_toRightOf="@id/RefreshConn" 
-            android:layout_centerVertical="true" />
+            android:layout_centerVertical="true" />  -->
     </RelativeLayout>
     
 	<!--   <Space 

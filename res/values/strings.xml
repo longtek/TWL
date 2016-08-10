@@ -17,7 +17,7 @@
     <string name="Test">Test</string>
     <string name="NotConnected">NO SoundCreator connected</string>
 	<string name="ConnectionFailed">Error: Connection failed. Please try again.</string>
-	<string name="lastCcgLoaded">Last CAN File loaded:</string>
+	<string name="lastCcgLoaded">The CAN File loaded:</string>
 	<string name="RPM">RPM:</string>
 	<string name="Speed">Speed:</string>
 	<string name="Throttle">Throttle:</string>
