@@ -1,5 +1,10 @@
 package com.longtek.bluetooth_control;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 
 import android.app.Activity;
@@ -28,18 +33,27 @@ public class BoxSettings extends Activity {
 	private Button LoadBox;			//选择BOX文件按钮
 	private Boolean IsBoxLoaded = true;
 	private Fac_Manager m_Manager = null;
-	
-	private String CcgFileName;
+	final int PICK_BOXFILE = 0;    //请求码
+	private String BoxFileName;
 	private String path;
-	//Box文件选择按钮单击事件监听器
+	private Uri pickData;       
+	private String BoxBuffer;
+	private String[] Box;
+	
+	//创建Box文件选择按钮单击事件监听器
 	private View.OnClickListener OnLoadBox = new View.OnClickListener()
 	{
 		public void onClick(View view)
-	    {
-			Intent intent = new Intent("android.intent.action.GET_CONTENT");
+	    {	
+			//创建Intent
+			Intent intent = new Intent();
+			//设置Intent的Action属性
+			intent.setAction("android.intent.action.GET_CONTENT");
+			//设置intent的Type属性
 			intent.setType("*/*");
 			intent.addCategory("android.intent.category.OPENABLE");
-			BoxSettings.this.startActivityForResult(Intent.createChooser(intent, "Choose Box file"), 4);
+			//启动Activity,并希望获取该Activity的结果
+			BoxSettings.this.startActivityForResult(Intent.createChooser(intent, "Choose Box file"), PICK_BOXFILE);
 	    }
 	};
 	
@@ -87,7 +101,7 @@ public class BoxSettings extends Activity {
 	
 	private boolean CleanBoxArrayAdapter()
 	{
-	    this.BoxArrayAdapter = new ArrayAdapter(this, 17367043);
+	    this.BoxArrayAdapter = new ArrayAdapter<String>(this, 17367043);
 	    this.ListBox.setAdapter(this.BoxArrayAdapter);
 	    return true;
 	}
@@ -107,9 +121,9 @@ public class BoxSettings extends Activity {
 	{
 		this.LoadBox = ((Button)findViewById(R.id.ButtonBrowseBoxBox));
 		this.DeleteAllBox = ((Button)findViewById(R.id.ButtonDeleteBoxBox));
-		this.BoxArrayAdapter = new ArrayAdapter(this, R.layout.activity_chooser_view_list_item);
-		this.ListBox = ((ListView)findViewById(R.id.listBoxBox));
-		this.ListBox.setChoiceMode(1);
+//		this.BoxArrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_chooser_view_list_item);
+//		this.ListBox = ((ListView)findViewById(R.id.listBoxBox));
+//		this.ListBox.setChoiceMode(1);
 	}
 	
 	@Override
@@ -120,7 +134,7 @@ public class BoxSettings extends Activity {
 		
 		init();
 		this.LoadBox.setOnClickListener(this.OnLoadBox);
-		
+		Log.d("OnloadBox", "选择按钮被点击了！！！");
 	}
 
 	@Override
@@ -246,30 +260,79 @@ public class BoxSettings extends Activity {
 		ActivityFinish();
 	}
 
+	/**
+	 * 读取BOX文件的内容
+	 * @return  BoxBuffer 
+	 */
+	
+	public String readBoxFile() 
+	{
+		try {
+			FileInputStream fis = new FileInputStream(pickData.getPath());    		//创建文件输入流，并传入BOX文件路径
+			//将指定的输入流包装成BufferReader
+			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+			StringBuffer sb = new StringBuffer();
+			String line = null;
+			//按行循环读取文件内容
+			while((line = br.readLine()) != null)
+			{
+				sb.append(line);
+			}
+			BoxBuffer = sb.toString();
+			System.out.println(BoxBuffer);      //输出文件内容
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	/***
-	 * 回调OnActivityResult方法，返回访问手机存储后，选取的文件结果
-	 * 
+	 * 回调OnActivityResult方法，返回访问手机存储后，选取的BOX文件结果
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
 		super.onActivityResult(requestCode, resultCode, data);
-		
-		if(requestCode == RESULT_OK){
-			
-			Uri uri = data.getData();
-			Log.d("Uri == ", uri.toString());
-			path = uri.getPath();
-			
-			if(!path.substring(path.lastIndexOf(".") + 1).equals("box")){
+		switch(requestCode)
+		{
+		case (PICK_BOXFILE) :
+			if(requestCode == Activity.RESULT_OK)
+			{
+				pickData = data.getData();
+				Log.d("--------------Uri----------------", pickData.toString());
 				
-				Toast toast = Toast.makeText(this, "Error: please select a .box file", 1);
-				toast.setGravity(17, 0, 0);
-				toast.show();
+				//判断选择文件是不是BOX文件
+				if(!path.substring(path.lastIndexOf(".") + 1).equals("box")){
+					
+					Toast toast = Toast.makeText(this, "Error: please select a .box file", 1);
+					toast.setGravity(17, 0, 0);
+					toast.show();
+					
+				}else{
+					path = pickData.getPath();
+					BoxFileName = path.substring(path.lastIndexOf("/") + 1, path.length());		//从路径中截获所选文件名
+					Log.d("当前所选文件----->>", BoxFileName);
+					//将所选文件名加入到文件列表
+					
+					Box = new String[10];     //Box文件存放数组
+					int i;
+					for(i = 0; i < 10; i++)
+					{
+						Box[i] = BoxFileName; 
+					}
+					this.BoxArrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_chooser_view_list_item, Box);
+					this.ListBox = ((ListView)findViewById(R.id.listBoxBox));
+					this.ListBox.setAdapter(BoxArrayAdapter);
+					this.ListBox.setChoiceMode(i);
+					
+					//读取文件
+					readBoxFile();
+				}
 			}
 		}
 	}
-	
-	
-	
 }

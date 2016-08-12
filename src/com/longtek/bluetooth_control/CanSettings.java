@@ -53,6 +53,8 @@ public class CanSettings extends Activity {
 	boolean isConnected = true;
 	private String path;
 	private Uri uri;
+	private String CcgBuffer;	
+	
 	//创建CAN设置按钮点击响应事件监听器
 	private View.OnClickListener OnCANSettings = new View.OnClickListener() {
 		
@@ -192,43 +194,6 @@ public class CanSettings extends Activity {
 		
 	}  
 	*/
-	public String read()
-	{
-		try {
-			//如果手机插入了SD卡，而且应用程序具有访问SD卡的权限
-			if(Environment.getExternalStorageState().equals(
-					Environment.MEDIA_MOUNTED))
-			{
-				//获取SD卡对应的存储目录
-				File sdCardDir = Environment.getExternalStorageDirectory();
-				System.out.println("----------------" + sdCardDir);
-				//获取指定文件的对应输入流
-//				FileInputStream fis = new FileInputStream(
-//						sdCardDir.getCanonicalPath() + SEND_FILE_NAME);
-				FileInputStream fis = new FileInputStream(uri.getPath());
-				//将指定输入流包装成BufferedReader
-				BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-				StringBuffer sb = new StringBuffer("");
-				String line = null;
-				//循环读取文件内容
-				while((line = br.readLine()) != null)
-				{
-					sb.append(line);
-				}
-				System.out.println(sb.toString());
-				//关闭资源
-				br.close();
-				return sb.toString();
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
 	
 	
 	public void CcgFlashed(boolean isConnected)
@@ -346,6 +311,21 @@ public class CanSettings extends Activity {
 		ActivityFinish();
 	}
 	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+
+		getMenuInflater().inflate(R.menu.main, menu);
+		//运行时，参数Menu其实就是MenuBuilder对象  
+        Log.d("MainActivity", "menu--->" + menu);  
+          
+        /*利用反射机制调用MenuBuilder的setOptionalIconsVisible方法设置mOptionalIconsVisible为true， 
+         * 给菜单设置图标时才可见 
+         */  
+        setIconEnable(menu, true);
+          
+        return super.onCreateOptionsMenu(menu);  
+	}
+	
 	
 	//enable为true时，菜单添加图标有效，enable为false时无效。4.0系统默认无效 
 	private void setIconEnable(Menu menu, boolean enable)  
@@ -365,7 +345,6 @@ public class CanSettings extends Activity {
         }  
     }  
 
-	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	 
@@ -411,7 +390,7 @@ public class CanSettings extends Activity {
   		if(resultCode==RESULT_OK){
   			uri = data.getData();
   			Log.i("uri", uri.toString());
-  			path = uri.getPath();
+  			path = uri.getPath();			//获取文件的路径
   			Log.d("path", path);
   			
 			if (!path.substring(path.lastIndexOf(".") + 1).equals("ccg"))
@@ -423,10 +402,18 @@ public class CanSettings extends Activity {
 				
 //				readCcgFile();
 				CcgFileName = path.substring(path.lastIndexOf("/") + 1, path.length());
-				CcgFile_tv.setText(CcgFileName);
+				CcgFile_tv.setText(CcgFileName);			//显示所选Ccg文件名
 				Toast.makeText(this, R.string.TransferComplete, 0).show();       //提示加载成功
 
-				read();
+				readCcgFile();			//读取Ccg文件内容
+				
+				try {
+					Log.i("----------------", "开始发送文件！");
+					sendCcgFile();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			
 			
@@ -453,6 +440,50 @@ public class CanSettings extends Activity {
   		
   	}
   	
+  	/**
+	 * 获取SD卡文件路径，读取Ccg文件内容
+	 * @return   sb.toString() 文件内容
+	 */
+	public String readCcgFile()
+	{
+		
+		try {
+			//如果手机插入了SD卡，而且应用程序具有访问SD卡的权限
+			if(Environment.getExternalStorageState().equals(
+					Environment.MEDIA_MOUNTED))
+			{
+				//获取SD卡对应的存储目录
+				File sdCardDir = Environment.getExternalStorageDirectory();
+				System.out.println("默认SD卡路径" + sdCardDir);
+				//获取指定文件的对应输入流
+//				FileInputStream fis = new FileInputStream( 
+//						sdCardDir.getCanonicalPath() + SEND_FILE_NAME);
+				FileInputStream fis = new FileInputStream(uri.getPath());			//传入文件路径创建输入流
+				//将指定输入流包装成BufferedReader
+				BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+				StringBuffer sb = new StringBuffer("");
+				String line = null;
+				//循环读取文件内容
+				while((line = br.readLine()) != null)
+				{
+					sb.append(line);
+				}
+				CcgBuffer = sb.toString();
+				System.out.println(CcgBuffer);
+				//关闭资源
+				br.close();
+				return CcgBuffer;
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
   	public void LoadCcg(Uri uri)
   	{
   		if(!((Connect)this.m_connect).IsConnected())
@@ -491,72 +522,49 @@ public class CanSettings extends Activity {
  		 write("c".getBytes());
  	 }
   	 
-  	public void write(byte[] paramArrayOfByte)
+  	public void write(byte[] ArrayOfByte)
 	{
-		try
-		{
-			String str = new String(paramArrayOfByte);
-		    byte[] Str = ("LOG trying to send " + paramArrayOfByte.length + " bytes: " + ((String)str).charAt(0)).getBytes();
-		    Message msg = new Message();
-		    Bundle localBundle = new Bundle();
-		    localBundle.putByteArray("data", (byte[])Str);
-		    ((Message)msg).setData(localBundle);
-//		    this.m_Handler.sendMessage((Message)msg);
-//		    this.m_OutStream.write(paramArrayOfByte);
-		    
-		    paramArrayOfByte = "LOG success".getBytes();
-//		    Message msg = new Message();
-//		    Bundle bundle = new Bundle();
-//		    ((Bundle)bundle).putByteArray("data", paramArrayOfByte);
-//		    ((Message)msg).setData((Bundle)bundle);
-//		    this.m_Handler.sendMessage((Message)msg);
-		    return;
-		}
-	    catch (Exception e)
-	    {
-	    	Log.e("procServer", "2");
-	    	paramArrayOfByte = "LOG fail IOException".getBytes();
-//	    	msg = new Message();
-//	    	bundle = new Bundle();
-//	    	((Bundle)localObject2).putByteArray("data", paramArrayOfByte);
-//	    	((Message)localObject1).setData((Bundle)localObject2);
-//	    	this.m_Handler.sendMessage((Message)localObject1);
-	    	return;
-	    }
+  		
 	}
-  	
 
   	public void setM_CcgName(String string)
   	{
   		this.m_CcgName = string;
   	}
-  	public void SendCcgFile()
+  	
+  	/**
+  	 * 获取输出流，发送选择的Ccg文件
+  	 */
+  	public void sendCcgFile()
   	{
   		int i=0;
     	int n=0;
     	try{
     		OutputStream os = _socket.getOutputStream();   //蓝牙连接输出流
 //    		byte[] bos = edit0.getText().toString().getBytes();
-    		byte[] ccg = this.ReadCcgFile(getFilesDir());
+//    		byte[] ccg = this.ReadCcgFile(getFilesDir());
+    		byte[] ccg  = CcgBuffer.getBytes();
     		for(i=0;i<ccg.length;i++)
     		{
     			if(ccg[i]==0x0a)
     				n++;
     		}
-    		byte[] bos_new = new byte[ccg.length+n];
+    		byte[] ccg_new = new byte[ccg.length+n];
     		n=0;
     		for(i=0;i<ccg.length;i++){ //手机中换行为0a,将其改为0d 0a后再发送
     			if(ccg[i]==0x0a){
-    				bos_new[n]=0x0d;
+    				ccg_new[n]=0x0d;
     				n++;
-    				bos_new[n]=0x0a;
+    				ccg_new[n]=0x0a;
     			}else{
-    				bos_new[n]=ccg[i];
+    				ccg_new[n]=ccg[i];
     			}
     			n++;
     		}
     		
-    		os.write(bos_new);	
+    		os.write(ccg_new);	
+    		
+    		Log.d("Ccg文件已发送", ccg_new.toString());
     	}catch(IOException e){  		
     	}  	
   	}
