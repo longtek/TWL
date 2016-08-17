@@ -175,7 +175,7 @@ public class DeviceListActivity extends Activity {
             String action = intent.getAction();
 
             // 查找到设备action
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {				//#######################
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {				// 如果扫描到任意蓝牙设备（ACTION_FOUND常量值，为一条广播）
                 // 得到蓝牙设备
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // 如果是已配对的则略过，已得到显示，其余的在添加到列表中进行显示

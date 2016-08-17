@@ -68,7 +68,7 @@ public class Connect extends Activity {
     public String throttle;
     public String filename=""; //用来保存存储的文件名
     BluetoothDevice _device = null;     //蓝牙设备
-    BluetoothSocket _socket = null;      //蓝牙通信socket
+    public BluetoothSocket _socket = null;      //蓝牙通信socket
     boolean _discoveryFinished = false;    
     boolean bRun = true;
     boolean bThread = false;
@@ -162,6 +162,7 @@ public class Connect extends Activity {
     	   }   	   
        }.start();   
        
+      
 //       if (this.IsConnected()) {
 //           this.TextConnectedTo.setText(getString(R.string.ConnectedTo) + this.m_Manager.getM_Data().getM_Device().getName());
 //       }
@@ -248,14 +249,29 @@ public class Connect extends Activity {
                 	return;
                 }
                 
-                //打开接收线程
+                //接收硬件通过蓝牙上传的数据
                 try{
             		is = _socket.getInputStream();   //得到蓝牙数据输入流
             		}catch(IOException e){
             			Toast.makeText(this, "接收数据失败！", Toast.LENGTH_SHORT).show();
             			return;
             		}
-            		if(bThread==false){
+                	try {
+						if(bThread == false){
+							//延时
+							Thread.sleep(200);
+							//开启读取数据的工作线程
+							ReadThread.start();
+							bThread = true;
+						}else{
+							bRun = true;
+						}
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+            		/*if(bThread==false){
             			
             			//延时
             			try {
@@ -270,7 +286,7 @@ public class Connect extends Activity {
             			bThread=true;
             		}else{
             			bRun = true;
-            		}
+            		}*///------>>存在运行运行异常
             }
     		break;
     	default:break;
@@ -321,15 +337,60 @@ public class Connect extends Activity {
     				}
     				
     				System.out.println(smsg);
+    			//启动一条子线程来响应蓝牙模块上传的数据	
+   /* 				new Thread()
+    				{
+    					@Override
+    					public void run()
+    					{
+    						try {
+    							 
+								Message msg = handler.obtainMessage();
+								handler.sendMessage(msg);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+    					}
+    				}.start();
+    				*/
+            		//使用Handler发送信息,进行显示刷新
+//            		try {
+//            			Message message = handler.obtainMessage();
+//            			handler.sendMessage(message);
+//            		} catch (Exception e) {
+//            			// TODO Auto-generated catch block
+//            			e.printStackTrace();
+//            		} ----------------------------------------->>此处存在运行异常，待解决
     				
     				//使用Handler发送信息,进行显示刷新
-    				Message message = handler.obtainMessage();
-    				handler.sendMessage(message);    
+//    				Message message = handler.obtainMessage();
+//    				handler.sendMessage(message);    
     					
     	    		}catch(IOException | InterruptedException e){
     	    			System.out.println("未收到数据");
+    	    			e.printStackTrace();
     	    		}
     		}
+    	}
+    };
+    
+    //消息处理队列
+    Handler handler= new Handler(){
+    	public void handleMessage(Message msg){
+    		super.handleMessage(msg);
+    		 
+    		//处理数据，截取转速，车速，油门开度
+    		
+    		rmp = smsg.substring(smsg.indexOf('R')+1, smsg.indexOf('S'));
+    		CanRPM.setText(rmp); 	  	//显示转速
+    			
+    		speed = smsg.substring(smsg.indexOf('S')+1, smsg.indexOf('T'));
+    		CanSpeed.setText(speed);	//显示车速
+    		
+    		throttle = smsg.substring(smsg.indexOf('T')+1, smsg.indexOf('E'));
+     		CanThrottle.setText(throttle);//显示油门开度
+    		
     	}
     };
     
@@ -359,25 +420,6 @@ public class Connect extends Activity {
     	}
     };
     
-    //消息处理队列
-    Handler handler= new Handler(){
-    	public void handleMessage(Message msg){
-    		super.handleMessage(msg);
-    		 
-    		//处理数据，截取转速，车速，油门开度
-    		
-    		rmp = smsg.substring(smsg.indexOf('R')+1, smsg.indexOf('S'));
-    		CanRPM.setText(rmp); 	  	//显示转速
-    			
-    		speed = smsg.substring(smsg.indexOf('S')+1, smsg.indexOf('T'));
-    		CanSpeed.setText(speed);	//显示车速
-    		
-    		throttle = smsg.substring(smsg.indexOf('T')+1, smsg.indexOf('E'));
-     		CanThrottle.setText(throttle);//显示油门开度
-    		
-    	}
-    };
-    
     //关闭程序掉用处理部分
     public void onDestroy(){
     	super.onDestroy();
@@ -387,41 +429,7 @@ public class Connect extends Activity {
 //    	}catch(IOException e){}
     //	_bluetooth.disable();  //关闭蓝牙服务
     }
-    
-    //菜单处理部分
-  /* @Override
-    public boolean onCreateOptionsMenu(Menu menu) {//建立菜单
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.option_menu, menu);
-        return true;
-    }*/
-
-  /*  @Override
-    public boolean onOptionsItemSelected(MenuItem item) { //菜单响应函数
-        switch (item.getItemId()) {
-        case R.id.scan:
-        	if(_bluetooth.isEnabled()==false){
-        		Toast.makeText(this, "Open BT......", Toast.LENGTH_LONG).show();
-        		return true;
-        	}
-            // Launch the DeviceListActivity to see devices and do scan
-            Intent serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
-            return true;
-        case R.id.quit:
-            finish();
-            return true;
-        case R.id.clear:
-        	smsg="";
-        	ls.setText(smsg);
-        	return true;
-        case R.id.save:
-        	Save();
-        	return true;
-        }
-        return false;
-    }*/
-    
+  
     //连接按键响应函数
     public void onConnectButtonClicked(View v){ 
     	if(_bluetooth.isEnabled()==false){  //如果蓝牙服务不可用则提示
@@ -596,49 +604,4 @@ public class Connect extends Activity {
 		this.throttle = throttle;
 	}
 	
-    /*//保存功能实现
-	private void Save() {
-		//显示对话框输入文件名
-		LayoutInflater factory = LayoutInflater.from(Connect.this);  //图层模板生成器句柄
-		final View DialogView =  factory.inflate(R.layout.sname, null);  //用sname.xml模板生成视图模板
-		new AlertDialog.Builder(Connect.this)
-								.setTitle("文件名")
-								.setView(DialogView)   //设置视图模板
-								.setPositiveButton("确定",
-								new DialogInterface.OnClickListener() //确定按键响应函数
-								{
-									public void onClick(DialogInterface dialog, int whichButton){
-										EditText text1 = (EditText)DialogView.findViewById(R.id.sname);  //得到文件名输入框句柄
-										filename = text1.getText().toString();  //得到文件名
-										
-										try{
-											if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){  //如果SD卡已准备好
-												
-												filename =filename+".txt";   //在文件名末尾加上.txt										
-												File sdCardDir = Environment.getExternalStorageDirectory();  //得到SD卡根目录
-												File BuildDir = new File(sdCardDir, "/data");   //打开data目录，如不存在则生成
-												if(BuildDir.exists()==false)BuildDir.mkdirs();
-												File saveFile =new File(BuildDir, filename);  //新建文件句柄，如已存在仍新建文档
-												FileOutputStream stream = new FileOutputStream(saveFile);  //打开文件输入流
-												stream.write(fmsg.getBytes());
-												stream.close();
-												Toast.makeText(Connect.this, "存储成功！", Toast.LENGTH_SHORT).show();
-											}else{
-												Toast.makeText(Connect.this, "没有存储卡！", Toast.LENGTH_LONG).show();
-											}
-										
-										}catch(IOException e){
-											return;
-										}
-										
-										
-										
-									}
-								})
-								.setNegativeButton("取消",   //取消按键响应函数,直接退出对话框不做任何处理 
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog, int which) { 
-									}
-								}).show();  //显示对话框
-	} */
 }

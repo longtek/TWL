@@ -290,10 +290,10 @@ public class BoxSettings extends Activity {
 		}
 		return null;
 	}
-	
-	/***
+/*	
+	*//***
 	 * 回调OnActivityResult方法，返回访问手机存储后，选取的BOX文件结果
-	 */
+	 *//*
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -318,21 +318,48 @@ public class BoxSettings extends Activity {
 					Log.d("当前所选文件----->>", BoxFileName);
 					//将所选文件名加入到文件列表
 					
-					Box = new String[10];     //Box文件存放数组
-					int i;
-					for(i = 0; i < 10; i++)
-					{
-						Box[i] = BoxFileName; 
-					}
-					this.BoxArrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_chooser_view_list_item, Box);
-					this.ListBox = ((ListView)findViewById(R.id.listBoxBox));
-					this.ListBox.setAdapter(BoxArrayAdapter);
-					this.ListBox.setChoiceMode(i);
+//					Box = new String[10];     //Box文件存放数组
+//					int i;
+//					for(i = 0; i < 10; i++)
+//					{
+//						Box[i] = BoxFileName; 
+//					}
+//					this.BoxArrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_chooser_view_list_item, Box);
+//					this.ListBox = ((ListView)findViewById(R.id.listBoxBox));
+//					this.ListBox.setAdapter(BoxArrayAdapter);
+//					this.ListBox.setChoiceMode(i);
 					
 					//读取文件
 					readBoxFile();
 				}
 			}
 		}
-	}
+	}*/
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		
+  		if(resultCode==RESULT_OK){
+  			pickData = data.getData();
+  			Log.i("uri", pickData.toString());
+  			path = pickData.getPath();			//获取文件的路径
+  			Log.d("path", path);
+  			
+			if (!path.substring(path.lastIndexOf(".") + 1).equals("box"))
+			{
+				Toast toast = Toast.makeText(this, "Error: Please select a .box file", 1);
+				toast.setGravity(17, 0, 0);
+				toast.show();
+			}else {
+				
+//				readCcgFile();
+				BoxFileName = path.substring(path.lastIndexOf("/") + 1, path.length());
+
+				Toast.makeText(this, R.string.TransferComplete, 0).show();       //提示加载成功
+
+				readBoxFile();			//读取Ccg文件内容
+				
+			}
+  		}
+  	}
 }

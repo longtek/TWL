@@ -9,10 +9,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.net.Socket;
+import java.util.UUID;
 
 import org.apache.http.util.EncodingUtils;
-
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.net.Uri;
@@ -29,7 +32,8 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 /**
- * CanSettings类，用于选择发送Ccg文件，显示控制盒回传的CAN数据（RPM、Speed、Throttle）
+ * CanSettings类
+ * 用于选择发送Ccg文件，显示控制盒回传的CAN数据（RPM、Speed、Throttle）
  * @author TWL
  * */
 public class CanSettings extends Activity {
@@ -41,6 +45,7 @@ public class CanSettings extends Activity {
 	private TextView CcgFile_tv;
 	private ToggleButton m_SpyOnOff;		//数据开关
 	
+	private Connect m_Connect;
 	private Fac_Manager m_Manager;
 	public static final int FILE_SELECT_CODE = 1000;    //选择文件 请求码
 	public static final String SEND_FILE_NAME = "MG GT.ccg";
@@ -48,7 +53,7 @@ public class CanSettings extends Activity {
 	private String CcgFileName;
 	private Connect m_connect;
 	private byte[] m_CcgBytes;
-	private BluetoothSocket _socket;
+	public BluetoothSocket _socket;
 	private String m_CcgName;
 	boolean isConnected = true;
 	private String path;
@@ -245,6 +250,7 @@ public class CanSettings extends Activity {
 	    String throttle1 = String.format("%d", new Object[] { Integer.valueOf(Throttle) });
 	    this.CanThrottle.setText(throttle1);
 	}
+	
 	//初始化该Activity的全部UI组件
 	public void init()
 	{
@@ -400,49 +406,89 @@ public class CanSettings extends Activity {
 				toast.show();
 			}else {
 				
-//				readCcgFile();
 				CcgFileName = path.substring(path.lastIndexOf("/") + 1, path.length());
 				CcgFile_tv.setText(CcgFileName);			//显示所选Ccg文件名
-				Toast.makeText(this, R.string.TransferComplete, 0).show();       //提示加载成功
-
+				
+				Log.d("------------------------------", "准备读取文件....");
 				readCcgFile();			//读取Ccg文件内容
 				
 				try {
-					Log.i("----------------", "开始发送文件！");
+					Log.i("----------------", "准备发送文件...");
 					sendCcgFile();
+					Toast.makeText(this, R.string.TransferComplete, 0).show();       //提示加载成功
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					Toast.makeText(this, R.string.TransferFailed, 1).show();			//提示加载失败
 				}
 			}
-			
-			
-//  			if (!uri.getPath().substring(uri.getPath().lastIndexOf(".") + 1).equals("ccg"))
-//  			{
-//  				Toast toast = Toast.makeText(this, "Error: Please select a .ccg file", 1);
-//  				toast.setGravity(17, 0, 0);
-//  				toast.show();
-//  				return ;
-//  			}
-//  			try {
-//  				//取得选择的文件的路径、文件名
-//  				path = uri.getPath();
-//  				CcgFileName = path.substring(path.lastIndexOf("/") + 1, path.length());
-//  				CcgFile_tv.setText(CcgFileName);
-//  				Toast.makeText(this, R.string.TransferComplete, 0).show();       //提示加载成功
-////						CcgFlashed();
-//  			} catch (Exception e) {	
-//  				Toast.makeText(this, R.string.TransferFailed, 1).show();			//提示加载失败
-//  			}
-//  			//读取选择的Ccg文件
-//  			 readCcgFile();
   		}
   		
   	}
   	
+	/**
+  	 * 获取输出流，发送选择的Ccg文件
+  	 */
+  	public void sendCcgFile()  
+  	{
+  		 
+    	Log.d("--------------------", "开始打开输出流");
+				try {
+//					if(!((Connect)this.m_connect).IsConnected())
+					if(!IsConnected())
+					{
+						PleaseDoConnection();
+					}else{
+						OutputStream os = ((Connect)this.m_connect)._socket.getOutputStream();
+						byte[] ccg  = CcgBuffer.getBytes("utf-8");
+						os.write(ccg);          //写入流
+						os.flush();
+						Log.d("-------------------------------", "发送文件中.....");
+						//关闭输出流，关闭Socket
+						os.close();
+						_socket.close();
+						
+						Log.d("Ccg文件已发送", ccg.toString());
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+//    		 while (true)
+//             {
+//                 BufferedReader reader = new BufferedReader(
+//                         new InputStreamReader(System.in));
+//  
+//                 String line = reader.readLine();
+//  
+//                 os.write(line.getBytes());
+//             }
+//         }
+//         catch (IOException e)
+//         {
+//             e.printStackTrace();
+//         }
+//    		
+  	}
+  	
+//	 private void sendDataToPairedDevice(String message ,BluetoothDevice device){       
+//  byte[] toSend = message.getBytes();
+//   try {
+//       UUID applicationUUID = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+//       BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(applicationUUID);
+//       OutputStream mmOutStream = socket.getOutputStream();
+//       mmOutStream.write(toSend);
+//       // Your Data is sent to  BT connected paired device ENJOY.
+//   } catch (IOException e) {
+//       Log.e(TAG, "Exception during write", e);
+//   }
+//}
+//调用函数
+//sendDataToPairedDevice("text to send" ,bluetoothDevice);
   	/**
 	 * 获取SD卡文件路径，读取Ccg文件内容
-	 * @return   sb.toString() 文件内容
+	 * @return  文件内容  sb.toString() 
 	 */
 	public String readCcgFile()
 	{
@@ -452,9 +498,9 @@ public class CanSettings extends Activity {
 			if(Environment.getExternalStorageState().equals(
 					Environment.MEDIA_MOUNTED))
 			{
-				//获取SD卡对应的存储目录
 				File sdCardDir = Environment.getExternalStorageDirectory();
-				System.out.println("默认SD卡路径" + sdCardDir);
+				//获取SD卡对应的存储目录
+				System.out.println("---------------------" + "开始读取文件内容...");
 				//获取指定文件的对应输入流
 //				FileInputStream fis = new FileInputStream( 
 //						sdCardDir.getCanonicalPath() + SEND_FILE_NAME);
@@ -468,10 +514,12 @@ public class CanSettings extends Activity {
 				{
 					sb.append(line);
 				}
+				Log.d("-----------------------", "所选CCG文件内容为:  ");
 				CcgBuffer = sb.toString();
 				System.out.println(CcgBuffer);
 				//关闭资源
 				br.close();
+				Log.d("-----------------------", "文件读取完毕！流已关闭！！！");
 				return CcgBuffer;
 			}
 		} catch (FileNotFoundException e) {
@@ -532,40 +580,9 @@ public class CanSettings extends Activity {
   		this.m_CcgName = string;
   	}
   	
-  	/**
-  	 * 获取输出流，发送选择的Ccg文件
-  	 */
-  	public void sendCcgFile()
+  	public boolean IsConnected()
   	{
-  		int i=0;
-    	int n=0;
-    	try{
-    		OutputStream os = _socket.getOutputStream();   //蓝牙连接输出流
-//    		byte[] bos = edit0.getText().toString().getBytes();
-//    		byte[] ccg = this.ReadCcgFile(getFilesDir());
-    		byte[] ccg  = CcgBuffer.getBytes();
-    		for(i=0;i<ccg.length;i++)
-    		{
-    			if(ccg[i]==0x0a)
-    				n++;
-    		}
-    		byte[] ccg_new = new byte[ccg.length+n];
-    		n=0;
-    		for(i=0;i<ccg.length;i++){ //手机中换行为0a,将其改为0d 0a后再发送
-    			if(ccg[i]==0x0a){
-    				ccg_new[n]=0x0d;
-    				n++;
-    				ccg_new[n]=0x0a;
-    			}else{
-    				ccg_new[n]=ccg[i];
-    			}
-    			n++;
-    		}
-    		
-    		os.write(ccg_new);	
-    		
-    		Log.d("Ccg文件已发送", ccg_new.toString());
-    	}catch(IOException e){  		
-    	}  	
+  		return (this._socket != null) && (this._socket.isConnected());
   	}
+     
 }

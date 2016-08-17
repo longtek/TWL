@@ -82,20 +82,20 @@ public class proc_Server extends Thread
 		}
 		for (;;)
 		{
-			/*if (i >= this.m_IdxEndMessage + 4)
+			if (i >= this.m_IdxEndMessage + 4)
 			{
 				this.m_IdxInMessage -= this.m_IdxEndMessage + 4;
 				return arrayOfByte;
-				arrayOfByte[i] = this.m_message[i];
-				i += 1;
-				break;
-				label91:
-					this.m_message[i] = this.m_message[(this.m_IdxEndMessage + i + 4)];
-				i += 1;
-				break label19;
+//				arrayOfByte[i] = this.m_message[i];
+//				i += 1;
+//				break;
+//				label91:
+//					this.m_message[i] = this.m_message[(this.m_IdxEndMessage + i + 4)];
+//				i += 1;
+//				break label19;
 			}
 			this.m_message[i] = 0;
-			i += 1;*/
+			i += 1;
 			
 			if(i >= this.m_IdxEndMessage + 4)
 			{
@@ -260,48 +260,9 @@ public class proc_Server extends Thread
 	*/
 	
 	public void write(byte[] paramArrayOfByte)
-	{
-		try
-		{
-			String str = new String(paramArrayOfByte);
-		    byte[] Str = ("LOG trying to send " + paramArrayOfByte.length + " bytes: " + ((String)str).charAt(0)).getBytes();
-		    Message msg = new Message();
-		    Bundle localBundle = new Bundle();
-		    localBundle.putByteArray("data", (byte[])Str);
-		    ((Message)msg).setData(localBundle);
-		    this.m_Handler.sendMessage((Message)msg);
-		    this.m_OutStream.write(paramArrayOfByte);
-		    
-		    paramArrayOfByte = "LOG success".getBytes();
-//		    Message msg = new Message();
-//		    Bundle bundle = new Bundle();
-//		    ((Bundle)bundle).putByteArray("data", paramArrayOfByte);
-//		    ((Message)msg).setData((Bundle)bundle);
-//		    this.m_Handler.sendMessage((Message)msg);
-		    return;
-		}
-	    catch (IOException e)
-	    {
-	    	Log.e("procServer", "2");
-	    	paramArrayOfByte = "LOG fail IOException".getBytes();
-//	    	msg = new Message();
-//	    	bundle = new Bundle();
-//	    	((Bundle)localObject2).putByteArray("data", paramArrayOfByte);
-//	    	((Message)localObject1).setData((Bundle)localObject2);
-//	    	this.m_Handler.sendMessage((Message)localObject1);
-	    	return;
-	    }
-	    catch (Exception ee)
-	    {
-	    	paramArrayOfByte = "LOG fail other Exception".getBytes();
-//	    	Object localObject1 = new Message();
-//	    	Object localObject2 = new Bundle();
-//	    	((Bundle)localObject2).putByteArray("data", paramArrayOfByte);
-//	    	((Message)localObject1).setData((Bundle)localObject2);
-//	    	this.m_Handler.sendMessage((Message)localObject1);
-	    }
+	{		 
+	}	
 	}
-}	
 	/*private final BluetoothSocket mmSocket;  
     private final InputStream mmInStream;  
     private final OutputStream mmOutStream;  

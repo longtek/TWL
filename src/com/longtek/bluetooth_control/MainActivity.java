@@ -448,5 +448,4 @@ public class MainActivity extends FragmentActivity
 	    this.BTArrayAdapter = paramArrayAdapter;
 	}
 	
-	
 }
