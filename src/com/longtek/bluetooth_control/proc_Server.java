@@ -436,7 +436,7 @@ private class ConnectedThread extends Thread {
          mHandler.obtainMessage(BluetoothSet.MESSAGE_WRITE, -1, -1, buffer)  
                  .sendToTarget();                  
            
-     }catch (IOException e) {  
+     }catch (IOException e) {   
              Log.e(TAG, "Exception during write", e);  
          }  
     }  

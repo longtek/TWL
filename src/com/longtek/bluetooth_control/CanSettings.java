@@ -415,6 +415,7 @@ public class CanSettings extends Activity {
 				try {
 					Log.i("----------------", "准备发送文件...");
 					sendCcgFile();
+//					sendDataToPairedDevice(CcgBuffer, ((Connect)this.m_connect)._device);
 					Toast.makeText(this, R.string.TransferComplete, 0).show();       //提示加载成功
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -435,12 +436,14 @@ public class CanSettings extends Activity {
     	Log.d("--------------------", "开始打开输出流");
 				try {
 //					if(!((Connect)this.m_connect).IsConnected())
-					if(!IsConnected())
-					{
-						PleaseDoConnection();
-					}else{
-						OutputStream os = ((Connect)this.m_connect)._socket.getOutputStream();
+//					if(!IsConnected())
+//					{
+//						Log.d("-----------------------", "重新连接蓝牙！");
+//						PleaseDoConnection();
+//					}else{
+						OutputStream os = ((Connect)this.m_connect)._socket.getOutputStream();    //空指针异常
 						byte[] ccg  = CcgBuffer.getBytes("utf-8");
+//						byte[] ccg  = sb.toString().getBytes("utf-8");
 						os.write(ccg);          //写入流
 						os.flush();
 						Log.d("-------------------------------", "发送文件中.....");
@@ -449,9 +452,8 @@ public class CanSettings extends Activity {
 						_socket.close();
 						
 						Log.d("Ccg文件已发送", ccg.toString());
-					}
+//					}
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
@@ -472,18 +474,20 @@ public class CanSettings extends Activity {
 //    		
   	}
   	
-//	 private void sendDataToPairedDevice(String message ,BluetoothDevice device){       
-//  byte[] toSend = message.getBytes();
-//   try {
-//       UUID applicationUUID = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
-//       BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(applicationUUID);
-//       OutputStream mmOutStream = socket.getOutputStream();
-//       mmOutStream.write(toSend);
-//       // Your Data is sent to  BT connected paired device ENJOY.
-//   } catch (IOException e) {
-//       Log.e(TAG, "Exception during write", e);
-//   }
-//}
+  	private void sendDataToPairedDevice(String message ,BluetoothDevice device){       
+  		byte[] toSend = message.getBytes();
+  		try {
+//  			UUID applicationUUID = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+  			UUID applicationUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+  		 
+  			BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(applicationUUID);
+  			OutputStream mmOutStream = socket.getOutputStream();
+  			mmOutStream.write(toSend);
+  			// Your Data is sent to  BT connected paired device ENJOY.
+  		} catch (IOException e) {
+  			Log.e("SendData", "Exception during write", e);
+  		}
+  	}
 //调用函数
 //sendDataToPairedDevice("text to send" ,bluetoothDevice);
   	/**
@@ -504,6 +508,7 @@ public class CanSettings extends Activity {
 				//获取指定文件的对应输入流
 //				FileInputStream fis = new FileInputStream( 
 //						sdCardDir.getCanonicalPath() + SEND_FILE_NAME);
+				
 				FileInputStream fis = new FileInputStream(uri.getPath());			//传入文件路径创建输入流
 				//将指定输入流包装成BufferedReader
 				BufferedReader br = new BufferedReader(new InputStreamReader(fis));

@@ -46,6 +46,7 @@ public class Connect extends Activity {
 	private final static int REQUEST_CONNECT_DEVICE = 1;    //请求码
 	
 	private final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";   //SPP服务UUID号
+	public BluetoothDevice _device;
 	
 	private InputStream is; 	   //输入流，用来接收蓝牙数据
 	//private TextView text0; 	   //提示栏解句柄
@@ -67,7 +68,6 @@ public class Connect extends Activity {
     public String speed;
     public String throttle;
     public String filename=""; //用来保存存储的文件名
-    BluetoothDevice _device = null;     //蓝牙设备
     public BluetoothSocket _socket = null;      //蓝牙通信socket
     boolean _discoveryFinished = false;    
     boolean bRun = true;
@@ -292,7 +292,7 @@ public class Connect extends Activity {
     	default:break;
     	}
     }
-    
+   
     //接收数据线程
     Thread ReadThread=new Thread(){
     	
@@ -337,8 +337,8 @@ public class Connect extends Activity {
     				}
     				
     				System.out.println(smsg);
-    			//启动一条子线程来响应蓝牙模块上传的数据	
-   /* 				new Thread()
+    				//启动一条子线程来响应蓝牙模块上传的数据	
+    			 /*	new Thread()
     				{
     					@Override
     					public void run()
@@ -352,8 +352,8 @@ public class Connect extends Activity {
 								e.printStackTrace();
 							}
     					}
-    				}.start();
-    				*/
+    				}.start();*/
+    			 
             		//使用Handler发送信息,进行显示刷新
 //            		try {
 //            			Message message = handler.obtainMessage();
