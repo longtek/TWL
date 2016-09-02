@@ -176,30 +176,30 @@ public class BoxSettings extends Activity {
 		// TODO Auto-generated method stub
 		switch (item.getItemId())
 		{
-		case R.id.menu_home:
-			GoHome();
-			break;
+//		case R.id.menu_home:
+//			GoHome();
+//			break;
 		case R.id.menu_connnection:
 			Launch_Connection();
 			break;
-		case R.id.menu_cansettings:
-			Launch_CanSettings();
-			break;
-		case R.id.menu_boxsettings:
-			Launch_BoxSettings();
-			break;
-		case R.id.menu_help:
-			Launch_Help();
-			break;
-		case R.id.menu_logs:
-			Launch_Logs();
-			break;
-		case R.id.menu_about:
-			Launch_About();
-			break;
-		case R.id.menu_demo:
-			Launch_Demo();
-			break;
+//		case R.id.menu_cansettings:
+//			Launch_CanSettings();
+//			break;
+//		case R.id.menu_boxsettings:
+//			Launch_BoxSettings();
+//			break;
+//		case R.id.menu_help:
+//			Launch_Help();
+//			break;
+//		case R.id.menu_logs:
+//			Launch_Logs();
+//			break;
+//		case R.id.menu_about:
+//			Launch_About();
+//			break;
+//		case R.id.menu_demo:
+//			Launch_Demo();
+//			break;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -357,7 +357,7 @@ public class BoxSettings extends Activity {
 
 				Toast.makeText(this, R.string.TransferComplete, 0).show();       //提示加载成功
 
-				readBoxFile();			//读取Ccg文件内容
+				readBoxFile();			//读取Box文件内容
 				
 			}
   		}

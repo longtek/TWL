@@ -1,11 +1,18 @@
 package com.longtek.bluetooth_control;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
+import java.net.Socket;
 import java.util.UUID;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,10 +21,13 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources.NotFoundException;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.text.InputFilter.LengthFilter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,9 +55,24 @@ public class Connect extends Activity {
 	private TextView TextConnectedTo;
 	private final static int REQUEST_CONNECT_DEVICE = 1;    //请求码
 	
-	private final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";   //SPP服务UUID号
+	public final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";   //SPP服务UUID号
+	protected static final int FILE_CHOOSE_CODE = 0;
 	public BluetoothDevice _device;
-	
+	public BluetoothSocket btSocket;      //蓝牙通信socket
+	public BluetoothSocket getBtSocket() {
+		return btSocket;
+	}
+
+	public void setBtSocket(BluetoothSocket btSocket) {
+		this.btSocket = btSocket;
+	}
+	private Uri uri;
+	private String path;
+	private String CcgFileName;
+	private String BoxFileName;
+	private byte[] CcgBuffer;
+	private byte[] BoxBuffer;
+	private String lineStr;
 	private InputStream is; 	   //输入流，用来接收蓝牙数据
 	//private TextView text0; 	   //提示栏解句柄
     private EditText edit0;  	  //发送数据输入句柄
@@ -55,33 +80,33 @@ public class Connect extends Activity {
     private ScrollView sv;     	 //翻页句柄
     private String smsg = ""; 	 //显示用数据缓存
     private String fmsg = ""; 	 //保存用数据缓存
-    private Button Disconnect;	
+    private Button btn_ScanDevices;	
     private ToggleButton m_SpyOnOff;		//数据显示开关
-    private TextView CanRPM; 		//发送机转速
-    private TextView CanSpeed;    	//车速
-    private TextView CanThrottle;	//油门开度
-
-    private Fac_Manager m_Manager = null;
-	private PC_Data m_Data = null;
+    private TextView tv_CanRPM; 		//发送机转速
+    private TextView tv_CanSpeed;    	//车速
+    private TextView tv_CanThrottle;	//油门开度
+    private TextView tv_SettingsFiles;   //文件显示文本
+    private TextView tv_ShowFile;
+    private Button btn_SettingsFiles;     //文件设置按钮
+    private Fac_Manager m_Manager;
+	private PC_Data m_Data;
 	
     public String rmp;
     public String speed;
     public String throttle;
     public String filename=""; //用来保存存储的文件名
-    public BluetoothSocket _socket = null;      //蓝牙通信socket
     boolean _discoveryFinished = false;    
     boolean bRun = true;
     boolean bThread = false;
-	private BluetoothSocket btSocket;
     private BluetoothAdapter _bluetooth = BluetoothAdapter.getDefaultAdapter();    //获取本地蓝牙适配器，即蓝牙设备
 	
-    private View.OnClickListener OnDisconnect = new View.OnClickListener() {
+    private View.OnClickListener OnScanDevices = new View.OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
 			
 			//如未连接设备则打开DeviceListActivity进行设备搜索
-	    	Button btn = (Button) findViewById(R.id.DisconnectConn);
+	    	Button btn = (Button) findViewById(R.id.btn_scandevices);
 	    	if(btSocket==null){
 	    		Intent serverIntent = new Intent(Connect.this, DeviceListActivity.class); //跳转程序设置
 	    		startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);  //设置返回宏定义
@@ -101,39 +126,75 @@ public class Connect extends Activity {
 		}
 	};
 	
+	private View.OnClickListener OnFilesSettings = new View.OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			//创建访问手机存储意图
+			Intent intent = new Intent("android.intent.action.GET_CONTENT");
+			intent.setType("*/*");   
+			intent.addCategory("android.intent.category.OPENABLE");
+			Connect.this.startActivityForResult(Intent.createChooser(intent, "choose a file"), FILE_CHOOSE_CODE);
+		}
+	};
+	
 	//创建数据显示开关点击响应事件监听器
 	  private View.OnClickListener OnSpyOnOff = new View.OnClickListener() {
 		
 		@Override
 		public void onClick(View arg0) {
 			// TODO Auto-generated method stub
-			if(!Connect.this.m_Manager.IsConnected())
+			if(!IsConnected())
 			{
-				((MainActivity) Connect.this.m_Manager.getM_Connect()).PleaseDoConnection();
+				PleaseDoConnection();
 				Connect.this.m_SpyOnOff.setChecked(false);
 				return ;
 			}
-			if (Connect.this.m_SpyOnOff.isChecked())
+			else if (Connect.this.m_SpyOnOff.isChecked())
 			{
-				Connect.this.m_Manager.SpyOn();
+				Connect.this.SpyOn();
 				return ;
 			}
-			Connect.this.m_Manager.SpyOff();
+			Connect.this.SpyOff();
 		}
 	};
+	
+	private void SpyOn()
+	{
+		Message msg = handler.obtainMessage();
+		handler.sendMessage(msg);
+	}
+	
+	private void SpyOff()
+	{
+		tv_CanRPM.setText("");
+		tv_CanSpeed.setText("");
+		tv_CanThrottle.setText("");
+	}
+	
+	//对话框提示用户连接蓝牙设备
+	public void PleaseDoConnection()
+	{
+		Toast toast = Toast.makeText(this, R.string.PleaseDoConnection, 1);
+		toast.setGravity(17, 0, 0);
+		toast.show();
+	}
 	
 	//初始化该Activity的全部UI组件
 	public void init()
 	{
 		this.TextConnectedTo = (TextView) findViewById(R.id.TextConnectedToConn);
-		this.Disconnect = (Button) findViewById(R.id.DisconnectConn);
-		this.CanRPM = (TextView) findViewById(R.id.textViewRPMCan);
-		this.CanSpeed = (TextView) findViewById(R.id.textViewSpeedCan);
-		this.CanThrottle = (TextView) findViewById(R.id.textViewThrottleCan);
+		this.btn_ScanDevices = (Button) findViewById(R.id.btn_scandevices);
+		this.tv_CanRPM = (TextView) findViewById(R.id.textViewRPMCan);
+		this.tv_CanSpeed = (TextView) findViewById(R.id.textViewSpeedCan);
+		this.tv_CanThrottle = (TextView) findViewById(R.id.textViewThrottleCan);
 		this.m_SpyOnOff = (ToggleButton) findViewById(R.id.buttonSpyOnOffCan);
 		this.m_SpyOnOff.setTextOff(getResources().getString(R.string.SpyOff));
 		this.m_SpyOnOff.setTextOn(getResources().getString(R.string.SpyOn));
 		this.m_SpyOnOff.setChecked(false);
+		this.tv_ShowFile = (TextView) findViewById(R.id.tv_showfile);
+		this.tv_SettingsFiles = (TextView) findViewById(R.id.btn_settingsfiles);
+		this.btn_SettingsFiles = (Button) findViewById(R.id.btn_settingsfiles);
 	}
 	
     @Override
@@ -143,8 +204,9 @@ public class Connect extends Activity {
        
         init();       //加载该类中的UI控件
         
-        this.Disconnect.setOnClickListener(this.OnDisconnect);
-//        this.m_SpyOnOff.setOnClickListener(this.OnSpyOnOff);				//存在点击异常
+        this.btn_ScanDevices.setOnClickListener(this.OnScanDevices);
+        this.btn_SettingsFiles.setOnClickListener(OnFilesSettings);
+        this.m_SpyOnOff.setOnClickListener(this.OnSpyOnOff);				 
         
        //如果打开本地蓝牙设备不成功，提示信息，结束程序
        if (_bluetooth == null){
@@ -170,7 +232,7 @@ public class Connect extends Activity {
 
     public boolean IsConnected()
     {
-    	return (this._socket != null) && (this._socket.isConnected());
+    	return (this.btSocket != null) && (this.btSocket.isConnected());
     }
     
     public PC_Data getM_Data()
@@ -187,7 +249,7 @@ public class Connect extends Activity {
     	int i=0;
     	int n=0;
     	try{
-    		OutputStream os = _socket.getOutputStream();   //蓝牙连接输出流
+    		OutputStream os = btSocket.getOutputStream();   //蓝牙连接输出流
     		byte[] bos = edit0.getText().toString().getBytes();
     		for(i=0;i<bos.length;i++){
     			if(bos[i]==0x0a)n++;
@@ -210,6 +272,36 @@ public class Connect extends Activity {
     	}  	
     }
     
+    public void connectToDevice()
+    {
+        // 用服务号得到socket
+        try{
+        	btSocket = _device.createRfcommSocketToServiceRecord(UUID.fromString(MY_UUID));
+        }catch(IOException e){
+        	Toast.makeText(this, "连接失败！", Toast.LENGTH_SHORT).show();
+        }
+        //连接socket
+    	Button btn = (Button) findViewById(R.id.btn_scandevices);
+    	TextView tv = (TextView) findViewById(R.id.TextConnectedToConn);
+        try{
+        	btSocket.connect();
+        	Toast.makeText(this, "连接"+_device.getName()+"成功！", Toast.LENGTH_SHORT).show();
+        	btn.setText("断开");
+        	tv.setText("connected to BT-06");
+//        	tv.setText(getString(R.string.ConnectedTo) + this.m_Manager.getM_Data().getM_Device().getName());
+        }catch(IOException e){
+        	try{
+        		Toast.makeText(this, "连接失败！", Toast.LENGTH_SHORT).show();
+        		btSocket.close();
+        		btSocket = null;
+        	}catch(IOException ee){
+        		Toast.makeText(this, "连接失败！", Toast.LENGTH_SHORT).show();
+        	}
+        	
+        	return;	
+        }
+    }
+    
     //接收活动结果，响应startActivityForResult()
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
     	switch(requestCode){
@@ -221,18 +313,18 @@ public class Connect extends Activity {
                                      .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
                 // 得到蓝牙设备句柄      
                 _device = _bluetooth.getRemoteDevice(address);
- 
+//                connectToDevice();
                 // 用服务号得到socket
                 try{
-                	_socket = _device.createRfcommSocketToServiceRecord(UUID.fromString(MY_UUID));
+                	btSocket = _device.createRfcommSocketToServiceRecord(UUID.fromString(MY_UUID));
                 }catch(IOException e){
                 	Toast.makeText(this, "连接失败！", Toast.LENGTH_SHORT).show();
                 }
                 //连接socket
-            	Button btn = (Button) findViewById(R.id.DisconnectConn);
+            	Button btn = (Button) findViewById(R.id.btn_scandevices);
             	TextView tv = (TextView) findViewById(R.id.TextConnectedToConn);
                 try{
-                	_socket.connect();
+                	btSocket.connect();
                 	Toast.makeText(this, "连接"+_device.getName()+"成功！", Toast.LENGTH_SHORT).show();
                 	btn.setText("断开");
                 	tv.setText("connected to BT-06");
@@ -240,8 +332,8 @@ public class Connect extends Activity {
                 }catch(IOException e){
                 	try{
                 		Toast.makeText(this, "连接失败！", Toast.LENGTH_SHORT).show();
-                		_socket.close();
-                		_socket = null;
+                		btSocket.close();
+                		btSocket = null;
                 	}catch(IOException ee){
                 		Toast.makeText(this, "连接失败！", Toast.LENGTH_SHORT).show();
                 	}
@@ -251,7 +343,7 @@ public class Connect extends Activity {
                 
                 //接收硬件通过蓝牙上传的数据
                 try{
-            		is = _socket.getInputStream();   //得到蓝牙数据输入流
+            		is = btSocket.getInputStream();   //得到蓝牙数据输入流
             		}catch(IOException e){
             			Toast.makeText(this, "接收数据失败！", Toast.LENGTH_SHORT).show();
             			return;
@@ -261,7 +353,7 @@ public class Connect extends Activity {
 							//延时
 							Thread.sleep(200);
 							//开启读取数据的工作线程
-							ReadThread.start();
+							ReadThread.start();                //关闭数据接收线程和输入流
 							bThread = true;
 						}else{
 							bRun = true;
@@ -270,7 +362,7 @@ public class Connect extends Activity {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-
+//                	receiveData();    //接收蓝牙模块BT—06上传的数据
             		/*if(bThread==false){
             			
             			//延时
@@ -289,10 +381,268 @@ public class Connect extends Activity {
             		}*///------>>存在运行运行异常
             }
     		break;
+    	case FILE_CHOOSE_CODE:
+    		if(resultCode==RESULT_OK){
+      			uri = data.getData();
+      			Log.i("uri", uri.toString());
+      			path = uri.getPath();			//获取文件的路径
+      			Log.d("path", path);
+      			
+    			if (!path.substring(path.lastIndexOf(".") + 1).equals("ccg") && !path.substring(path.lastIndexOf(".") + 1).equals("box"))
+    			{
+    				Toast toast = Toast.makeText(this, "Error: Please select a corrent file format!", 1);
+    				toast.setGravity(17, 0, 0);
+    				toast.show();
+    			}else if(path.substring(path.lastIndexOf(".") + 1).equals("ccg")){
+    				
+    				CcgFileName = path.substring(path.lastIndexOf("/") + 1, path.length());
+    				tv_ShowFile.setText(CcgFileName);			//显示所选Ccg文件名
+    				
+    				Log.d("------------------------------", "准备读取文件....");
+    				readCcgFile();			//读取Ccg文件内容
+    				
+    				try {
+    					Log.i("----------------", "准备发送文件...");
+    					sendCcgFile();
+    					Toast.makeText(this, R.string.TransferComplete, 0).show();       //提示加载成功
+    				} catch (Exception e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    					Toast.makeText(this, R.string.TransferFailed, 1).show();			//提示加载失败
+    				}
+    			} else {
+    				BoxFileName = path.substring(path.lastIndexOf("/") + 1, path.length());
+    				tv_ShowFile.setText(BoxFileName);
+    				
+    				readBoxFile();      //读取BOX文件内容
+    				
+    				try {
+						sendBoxFile();     //发送BOX文件内容
+						Toast.makeText(this, R.string.TransferComplete, 0).show();
+					} catch (NotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						Toast.makeText(this, R.string.TransferFailed, 1).show();			//提示加载失败
+					}    				
+    			}
+      		}
     	default:break;
     	}
     }
    
+    public String readBoxFile()
+    {
+    	try {
+			//如果手机插入了SD卡，而且应用程序具有访问SD卡的权限
+			if(Environment.getExternalStorageState().equals(
+					Environment.MEDIA_MOUNTED))
+			{
+				File sdCardDir = Environment.getExternalStorageDirectory();
+				//获取SD卡对应的存储目录
+				System.out.println("---------------------" + "开始读取文件内容...");
+				//获取指定文件的对应输入流
+//				FileInputStream fis = new FileInputStream( 
+//						sdCardDir.getCanonicalPath() + SEND_FILE_NAME);
+				
+				FileInputStream fis = new FileInputStream(uri.getPath());			//传入Box文件路径创建输入流
+				//将指定输入流包装成BufferedReader
+				BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+				StringBuffer sb = new StringBuffer("");
+				String lineStr = null;
+				int lineNum = 1;
+				//循环读取文件内容
+				while((lineStr = br.readLine()) != null)
+				{
+ 					
+					System.out.println(lineStr);
+					String newlineStr = lineStr + "\r\n";
+					sb.append(newlineStr);
+					lineNum ++;
+				}
+				BoxBuffer = sb.toString().getBytes();
+				System.out.println("所选Box文件内容为:  " +  sb.toString());
+				//关闭资源
+				br.close();
+				return sb.toString();
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+    }
+    
+    public static String bytesToHexString(byte[] bytes)
+    {	
+        String result = "";
+        for (int i = 0; i < bytes.length; i++) {
+            String hexString = Integer.toHexString(bytes[i] & 0xFF);
+            if (hexString.length() == 1) {
+                hexString = '0' + hexString;
+            }
+            result += hexString.toUpperCase();
+        }
+        return result;
+    }
+    
+    public void sendBoxFile()
+    {
+		System.out.println("开始打开输出流");
+			try {
+				if(!IsConnected())
+				{ 
+					System.out.println("请重新连接蓝牙！");
+					PleaseDoConnection();
+				}else{
+//					Connect m_Connect = new Connect();
+//					OutputStream os = m_Connect.getBtSocket().getOutputStream();    
+//					OutputStream os = this.getBtSocket().getOutputStream();    
+					OutputStream os = btSocket.getOutputStream();
+					//将指定输入流包装成BufferedReader
+					os.write(BoxBuffer);
+					os.flush();
+					System.out.println("正在发送BOX文件.....");
+					//关闭输出流，关闭Socket
+					os.close();
+//					this.getBtSocket().close();
+					btSocket.close();
+					System.out.println("已发送BOX文件内容：" + BoxBuffer);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				 System.out.println("呃哦！！发送失败了！");
+			}
+    }
+    
+    /**
+  	 * 获取输出流，发送选择的Ccg文件
+  	 */
+  	public void sendCcgFile()  
+  	{
+//  		byte[] ccg = CcgBuffer.getBytes();
+  		System.out.println("开始打开输出流");
+  			try {
+					if(!IsConnected())
+					{ 
+						System.out.println("请重新连接蓝牙！");
+						PleaseDoConnection();
+					}else{
+//						Connect m_Connect = new Connect();
+//						OutputStream os = m_Connect.getBtSocket().getOutputStream();    
+//						OutputStream os = this.getBtSocket().getOutputStream();    
+						OutputStream os = btSocket.getOutputStream();
+						//将指定输入流包装成BufferedReader
+ 
+				 
+						os.write(CcgBuffer);
+						os.flush();
+						System.out.println("正在发送文件.....");
+						//关闭输出流，关闭Socket
+//						os.close();
+//						this.getBtSocket().close();
+//						btSocket.close();
+						System.out.println("已发送文件内容：" + CcgBuffer);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					 System.out.println("呃哦！！发送失败了！");
+				}
+				
+//    		 while (true)
+//             {
+//                 BufferedReader reader = new BufferedReader(
+//                         new InputStreamReader(System.in));
+//  
+//                 String line = reader.readLine();
+//  
+//                 os.write(line.getBytes());
+//             }
+//         }
+//         catch (IOException e)
+//         {
+//             e.printStackTrace();
+//         }
+//    		
+  	}
+  	
+    /**
+	 * 获取SD卡文件路径，读取Ccg文件内容
+	 * @return  文件内容  sb.toString() 
+	 */
+	public String readCcgFile()
+	{
+		
+		try {
+			//如果手机插入了SD卡，而且应用程序具有访问SD卡的权限
+			if(Environment.getExternalStorageState().equals(
+					Environment.MEDIA_MOUNTED))
+			{
+				File sdCardDir = Environment.getExternalStorageDirectory();
+				//获取SD卡对应的存储目录
+				System.out.println("---------------------" + "开始读取文件内容...");
+				//获取指定文件的对应输入流
+//				FileInputStream fis = new FileInputStream( 
+//						sdCardDir.getCanonicalPath() + SEND_FILE_NAME);
+				
+				FileInputStream fis = new FileInputStream(uri.getPath());			//传入文件路径创建输入流
+				//将指定输入流包装成BufferedReader
+				BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+				StringBuffer sb = new StringBuffer("");
+				String lineStr = null;
+				int lineNum = 1;
+				//循环读取文件内容
+				while((lineStr = br.readLine()) != null)
+				{
+ 					
+					System.out.println(lineStr);
+					String newlineStr = lineStr + "\r\n";
+					sb.append(newlineStr);
+					lineNum ++;
+				}
+				CcgBuffer = sb.toString().getBytes();
+				System.out.println("所选CCG文件内容为:  " +  sb.toString());
+				//关闭资源
+				br.close();
+				return sb.toString();
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+    public void receiveData()
+    {
+    	 //接收硬件通过蓝牙上传的数据
+        try{
+    		is = btSocket.getInputStream();   //得到蓝牙数据输入流
+    		}catch(IOException e){
+    			Toast.makeText(this, "接收数据失败！", Toast.LENGTH_SHORT).show();
+    			return;
+    		}
+        	try {
+				if(bThread == false){
+					//延时
+					Thread.sleep(200);
+					//开启读取数据的工作线程
+					ReadThread.start();
+					bThread = true;
+				}else{
+					bRun = true;
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	
+    }
     //接收数据线程
     Thread ReadThread=new Thread(){
     	
@@ -361,7 +711,7 @@ public class Connect extends Activity {
 //            		} catch (Exception e) {
 //            			// TODO Auto-generated catch block
 //            			e.printStackTrace();
-//            		} ----------------------------------------->>此处存在运行异常，待解决
+//            		} 
     				
     				//使用Handler发送信息,进行显示刷新
 //    				Message message = handler.obtainMessage();
@@ -383,13 +733,13 @@ public class Connect extends Activity {
     		//处理数据，截取转速，车速，油门开度
     		
     		rmp = smsg.substring(smsg.indexOf('R')+1, smsg.indexOf('S'));
-    		CanRPM.setText(rmp); 	  	//显示转速
+    		tv_CanRPM.setText(rmp); 	  	//显示转速
     			
     		speed = smsg.substring(smsg.indexOf('S')+1, smsg.indexOf('T'));
-    		CanSpeed.setText(speed);	//显示车速
+    		tv_CanSpeed.setText(speed);	//显示车速
     		
     		throttle = smsg.substring(smsg.indexOf('T')+1, smsg.indexOf('E'));
-     		CanThrottle.setText(throttle);//显示油门开度
+     		tv_CanThrottle.setText(throttle);//显示油门开度
     		
     	}
     };
@@ -439,8 +789,8 @@ public class Connect extends Activity {
     	
     	
         //如未连接设备则打开DeviceListActivity进行设备搜索
-    	Button btn = (Button) findViewById(R.id.DisconnectConn);
-    	if(_socket==null){
+    	Button btn = (Button) findViewById(R.id.btn_scandevices);
+    	if(btSocket==null){
     		Intent serverIntent = new Intent(this, DeviceListActivity.class); //跳转程序设置
     		startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);  //设置返回宏定义
     	}
@@ -449,8 +799,8 @@ public class Connect extends Activity {
     	    try{
     	    	
     	    	is.close();
-    	    	_socket.close();
-    	    	_socket = null;
+    	    	btSocket.close();
+    	    	btSocket = null;
     	    	bRun = false;
     	    	btn.setText("连接");
     	    }catch(IOException e){}   
@@ -490,7 +840,7 @@ public class Connect extends Activity {
             e.printStackTrace();  
         }  
     }  
-
+	/*	
 	//点击选项菜单响应函数
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -527,7 +877,7 @@ public class Connect extends Activity {
 		
 		return true;
 	}
-
+*/
 	public void ActivityFinish()
 	{
 		this.m_Manager.deleteBoxSettings();

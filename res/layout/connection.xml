@@ -17,63 +17,57 @@
 	  <RelativeLayout 
         android:layout_width="fill_parent" 
         android:layout_height="wrap_content">
-        <Button 
-            android:textColor="@android:color/white" 
-            android:id="@id/DisconnectConn" 
-            android:background="@color/blue" 
-            android:padding="5.0dip" 
-            android:layout_width="wrap_content" 
-            android:layout_height="50.0dip" 
-            android:text="ScanDevices" 
-            android:layout_alignParentTop="true" 
-            android:layout_alignParentRight="false" 
-            android:layout_centerInParent="true" />
-    	<ImageButton 
-            android:id="@id/RefreshConn" 
-            android:background="@color/blue" 
-            android:layout_width="50.0dip" 
-            android:layout_height="50.0dip" 
-            android:src="@drawable/refresh" />
-      	<!-- <ProgressBar 
-            android:id="@id/progressBarDeviceDiscoveryConn" 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:layout_toRightOf="@id/RefreshConn" 
-            android:layout_centerVertical="true" />  -->
+
+    	<Button
+    	    android:id="@+id/btn_scandevices"
+    	    android:layout_width="wrap_content"
+    	    android:layout_height="50.0dip"
+    	    android:layout_alignParentLeft="true"
+    	    android:layout_alignParentTop="true"
+    	    android:background="@color/blue"
+    	    android:padding="5.0dip"
+    	    android:text="ScanDevices"
+    	    android:textColor="@android:color/white" />
+    	
     </RelativeLayout>
     
-	<!--   <Space 
-        android:layout_width="fill_parent" 
-        android:layout_height="20.0dip" />
-	  <ListView 
-        android:id="@id/listViewBTDeviceConn" 
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content" />
-	  -->
+	  <Space 
+    	    android:layout_width="fill_parent" 
+        	android:layout_height="20.0dip" />
 	  
-	 <!--   <TextView android:id="@+id/Text0"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="HC-06"
-        android:textSize="20dp"
-    />
-    <ScrollView
-		android:id="@+id/ScrollView01"
-		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:scrollbars="vertical"
-		android:layout_weight="1"
-		>
-		<TextView android:id="@+id/in"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-    />
-    </ScrollView> -->
+	<LinearLayout
+	    android:layout_width="fill_parent" 
+        android:layout_height="wrap_content" >
+	  
+	    <TextView 
+            android:textAppearance="?android:textAppearanceLarge" 
+            android:id="@+id/tv_settingsfiles" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:text="The file loaded:" />
 
-	 <Space 
-        android:layout_width="fill_parent" 
-        android:layout_height="40.0dip" />
-    
+	     <TextView
+	         android:id="@+id/tv_showfile"
+	         android:layout_width="match_parent"
+	         android:layout_height="wrap_content"
+	         android:textAppearance="?android:textAppearanceLarge" />
+	     
+	 </LinearLayout>  
+	 
+	    <Button 
+        android:textColor="@android:color/white" 
+        android:id="@+id/btn_settingsfiles" 
+        android:background="@color/blue" 
+        android:padding="5.0dip" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:layout_below="@id/tv_settingsfiles"
+        android:text="Files Settings" />
+	  
+	<Space 
+    	android:layout_width="fill_parent" 
+        android:layout_height="20.0dip" />
+	
     <ToggleButton 
         android:id="@id/buttonSpyOnOffCan" 
         android:layout_width="wrap_content" 
@@ -173,27 +167,5 @@
                 android:text="%" />
         </TableRow>
     </TableLayout>
-    <!-- <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
-		<EditText  
-			android:id="@+id/Edit0" 
-			android:layout_width="wrap_content" 
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:layout_gravity="bottom">
-		</EditText>
-		<Button
-           android:id="@+id/SendMsgBtn"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:background="@color/blue"
-           android:text="Send" 
-           android:textSize="20dp"
-           android:textColor="@android:color/white"
-           android:onClick="onSendButtonClicked"/>
-    </LinearLayout> -->
-    
+   
 </LinearLayout>

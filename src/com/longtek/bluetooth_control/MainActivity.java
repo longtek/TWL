@@ -20,10 +20,9 @@ import android.app.Activity;
 import android.app.Dialog;
 
 /**
- * 应用程序主类
+ * 主类：用于展示应用程序主界面及主控制逻辑
  * 
  * @author TWL
- *
  */
 public class MainActivity extends FragmentActivity
 {
@@ -58,7 +57,7 @@ public class MainActivity extends FragmentActivity
 		
 		@Override
 		public void onClick(View v) {
-			MainActivity.this.Launch_Connection();      //从主界面进入蓝牙连接界面
+			MainActivity.this.Launch_Connection();      //从主界面启动蓝牙连接界面
 		}
 	};
 
@@ -153,15 +152,15 @@ public class MainActivity extends FragmentActivity
 	{
 		if (Isconnected)
 	    {
-			this.Connect.setBackgroundColor(-16711936);       //颜色值未定
+			this.Connect.setBackgroundColor(-16711936);       //设置按钮背景色（颜色值未定）
 			String str = getString(R.string.ConnectedTo) + this.m_Manager.getM_Data().getM_Device().getName();
-			this.Connect.setText(str);
+			this.Connect.setText(str);				//设置当前连接蓝牙设备名称
 			CleanBTArrayAdapter();
 			return;
 	    }
-	    this.Connect.setBackgroundResource(17301508);		 //颜色值未定
+	    this.Connect.setBackgroundResource(17301508);		      
 	    this.Connect.setText(R.string.ConnectToSoundCreator);
-	    Clean_NBox();
+	    Clean_NBox();             //蓝牙未连接，则清空BOX文件
 	    updateVolume(0);
 	}
 	
@@ -254,6 +253,7 @@ public class MainActivity extends FragmentActivity
 		this.Plus = ((Button)findViewById(R.id.ButtonPlus));
 		this.Moins = ((Button)findViewById(R.id.ButtonMoins));
 		this.Volume = ((ProgressBar)findViewById(R.id.ProgressBarVolume));
+
 		this.TextVolume = ((TextView)findViewById(R.id.TextVolume));
 		this.VolumeOn = ((ImageButton)findViewById(R.id.ButtonVolume));
 		this.Debug = ((TextView)findViewById(R.id.TextDebug));
@@ -315,30 +315,30 @@ public class MainActivity extends FragmentActivity
 		//通过菜单项的ID响应每个菜单
 				switch (item.getItemId())
 				{
-				case R.id.menu_home:
-					GoHome();
-					break;
+//				case R.id.menu_home:
+//					GoHome();
+//					break;
 				case R.id.menu_connnection:
 					Launch_Connection();
 					break;
-				case R.id.menu_demo:
-					Launch_Demo();
-					break;
-				case R.id.menu_boxsettings:
-					Launch_BoxSettings();
-					break;
-				case R.id.menu_cansettings:
-					Launch_CanSettings();
-					break;
-				case R.id.menu_help:
-					Launch_Help();
-					break;
-				case R.id.menu_about:
-					Launch_About();
-					break;
-				case R.id.menu_logs:
-					Launch_Logs();
-					break;
+//				case R.id.menu_demo:
+//					Launch_Demo();
+//					break;
+//				case R.id.menu_boxsettings:
+//					Launch_BoxSettings();
+//					break;
+//				case R.id.menu_cansettings:
+//					Launch_CanSettings();
+//					break;
+//				case R.id.menu_help:
+//					Launch_Help();
+//					break;
+//				case R.id.menu_about:
+//					Launch_About();
+//					break;
+//				case R.id.menu_logs:
+//					Launch_Logs();
+//					break;
 				default:
 					return super.onOptionsItemSelected(item);		//对没有处理的事件交给父类处理
 				}

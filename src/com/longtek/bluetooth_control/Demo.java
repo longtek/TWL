@@ -109,30 +109,30 @@ public class Demo extends Activity {
 		// TODO Auto-generated method stub
 		switch (item.getItemId())
 		{
-		case R.id.menu_home:
-			GoHome();
-			break;
+//		case R.id.menu_home:
+//			GoHome();
+//			break;
 		case R.id.menu_connnection:
 			Launch_Connection();
 			break;
-		case R.id.menu_cansettings:
-			Launch_CanSettings();
-			break;
-		case R.id.menu_boxsettings:
-			Launch_BoxSettings();
-			break;
-		case R.id.menu_demo:
-			Launch_Demo();
-			break;
-		case R.id.menu_logs:
-			Launch_Logs();
-			break;
-		case R.id.menu_help:
-			Launch_Help();
-			break;
-		case R.id.menu_about:
-			Launch_About();
-			break;
+//		case R.id.menu_cansettings:
+//			Launch_CanSettings();
+//			break;
+//		case R.id.menu_boxsettings:
+//			Launch_BoxSettings();
+//			break;
+//		case R.id.menu_demo:
+//			Launch_Demo();
+//			break;
+//		case R.id.menu_logs:
+//			Launch_Logs();
+//			break;
+//		case R.id.menu_help:
+//			Launch_Help();
+//			break;
+//		case R.id.menu_about:
+//			Launch_About();
+//			break;
 		default:
 			break;
 		}

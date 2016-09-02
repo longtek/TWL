@@ -21,12 +21,12 @@ import com.longtek.bluetoothUtil.TransmitBean;
  * */
 public class proc_Server extends Thread
 {
-	private Handler m_Handler = null;
+	private Handler m_Handler;
 	private int m_IdxEndMessage = 0;
 	private int m_IdxInMessage = 0;
-	private InputStream m_InStream = null;
+	private InputStream m_InStream;
 	private int m_MaxBufferSize = 1000;
-	private OutputStream m_OutStream = null;
+	private OutputStream m_OutStream;
 	private BluetoothSocket m_Socket;
 	private byte[] m_message;
 	private boolean m_stopThread = false;
@@ -54,14 +54,14 @@ public class proc_Server extends Thread
 	}
   
 	//
-	public void copyToMessage(byte[] ArrayOfByte, int paramInt)
+	public void copyToMessage(byte[] ArrayOfByte, int Int)
 	{
 		int i = 0;
 		for (;;)
 		{
-			if (i >= paramInt)
+			if (i >= Int)
 			{
-				this.m_IdxInMessage += paramInt % this.m_MaxBufferSize;
+				this.m_IdxInMessage += Int % this.m_MaxBufferSize;
 				return;
 			}
 			this.m_message[((this.m_IdxInMessage + i) % this.m_MaxBufferSize)] = ArrayOfByte[i];
@@ -89,10 +89,8 @@ public class proc_Server extends Thread
 //				arrayOfByte[i] = this.m_message[i];
 //				i += 1;
 //				break;
-//				label91:
 //					this.m_message[i] = this.m_message[(this.m_IdxEndMessage + i + 4)];
 //				i += 1;
-//				break label19;
 			}
 			this.m_message[i] = 0;
 			i += 1;

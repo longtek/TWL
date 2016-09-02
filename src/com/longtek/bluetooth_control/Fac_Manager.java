@@ -27,17 +27,17 @@ import java.util.regex.Pattern;
  * */
 public class Fac_Manager
 {
-	private static Fac_Manager m_UniqueInstance = null;
+	private static Fac_Manager m_UniqueInstance;
 	public Fac_BroadcastReceiver bReceiver;
-	private PC_Data m_Data = null;
-	private Context m_About = null;
-	private Context m_BoxSettings = null;
-	private Context m_CANSettings = null;
-	private Context m_Connect = null;
-	private Context m_Demo = null;
-	private Fac_com m_com = null;
-	private Context m_context = null;
-	private Fac_Handler m_handler = null;
+	private PC_Data m_Data;
+	private Context m_About;
+	private Context m_BoxSettings;
+	private Context m_CANSettings;
+	private Context m_Connect;
+	private Context m_Demo;
+	private Fac_com m_com;
+	private Context m_context;
+	private Fac_Handler m_handler;
 	private BluetoothAdapter myBluetoothAdapter;
   
 	public Fac_Manager(Context context)
@@ -48,7 +48,7 @@ public class Fac_Manager
 		this.m_handler = new Fac_Handler(this);
 		this.m_com = new Fac_com(this.m_handler);
 		this.myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		//检查本地蓝牙是否打开
+		//检查本地蓝牙是否打开（APP启动即提示允许应用程序操作蓝牙）
 //		if (!this.myBluetoothAdapter.isEnabled())
 //		{
 //			this.myBluetoothAdapter.enable();
@@ -73,11 +73,11 @@ public class Fac_Manager
 		return m_UniqueInstance;
 	}
   
-	//解析整型数据和浮点型数据，返回到数组类表中
-	private ArrayList<String> parseIntsAndFloats(String paramString)
+	//解析整型数据和浮点型数据，返回到动态数组中
+	private ArrayList<String> parseIntsAndFloats(String str)
 	{
 		ArrayList localArrayList = new ArrayList();
-		Matcher matcher = Pattern.compile("[-]?[0-9]*\\.?,?[0-9]+").matcher(paramString);     //将正则表达式放入到模式的匹配器中
+		Matcher matcher = Pattern.compile("[-]?[0-9]*\\.?,?[0-9]+").matcher(str);     //将正则表达式放入到模式的匹配器中
 		for (;;)
 		{	//当且仅当输入序列的子序列匹配此匹配器的模式时，返回数组序列
 			if (!matcher.find()) {
@@ -93,16 +93,16 @@ public class Fac_Manager
 		this.m_Data.setM_Logs(string);
 	}
   
-	public void BoxDeleted(byte[] paramArrayOfByte)
+	public void BoxDeleted(byte[] ArrayOfByte)
 	{
 		Dir();
 	}
   
-	public void BoxFlashed(byte[] paramArrayOfByte)
+	public void BoxFlashed(byte[] ArrayOfByte)
 	{
-		String str = new String(paramArrayOfByte);
+		String str = new String(ArrayOfByte);
 		Dir();
-		((BoxSettings)this.m_BoxSettings).BoxFlashed(paramArrayOfByte.equals("y"));
+		((BoxSettings)this.m_BoxSettings).BoxFlashed(ArrayOfByte.equals("y"));
 	}
   
 	public void BoxLoaded(String ArrayOfByte)
@@ -124,9 +124,9 @@ public class Fac_Manager
 		this.m_Data.setM_Muted(bool);
 	}
   
-	public void BoxReadyToReceiveData(byte[] paramArrayOfByte)
+	public void BoxReadyToReceiveData(byte[] ArrayOfByte)
 	{
-		switch (paramArrayOfByte[0])
+		switch (ArrayOfByte[0])
 		{
 		case 1: 
 			this.m_com.sendBoxData(this.m_Data.getM_BoxBytes());
@@ -140,22 +140,22 @@ public class Fac_Manager
 		}
   	}
   
-	public void CcgFlashed(byte[] paramArrayOfByte)
+	public void CcgFlashed(byte[] ArrayOfByte)
 	{
-		String str = new String(paramArrayOfByte);
-		((CanSettings)this.m_CANSettings).CcgFlashed(paramArrayOfByte.equals("y"));
+		String str = new String(ArrayOfByte);
+		((CanSettings)this.m_CANSettings).CcgFlashed(ArrayOfByte.equals("y"));
 	}
   
-	public void CcgLoaded(byte[] paramArrayOfByte)
+	public void CcgLoaded(byte[] ArrayOfByte)
 	{
-		String str = new String(paramArrayOfByte);
-		if (paramArrayOfByte.equals("y"))
+		String str = new String(ArrayOfByte);
+		if (ArrayOfByte.equals("y"))
 		{
 			this.m_com.flashCcg();
-			((CanSettings)this.m_CANSettings).CcgLoaded(paramArrayOfByte.equals("y"));
+			((CanSettings)this.m_CANSettings).CcgLoaded(ArrayOfByte.equals("y"));
 			return;
 		}
-		((CanSettings)this.m_CANSettings).CcgLoaded(paramArrayOfByte.equals("y"));
+		((CanSettings)this.m_CANSettings).CcgLoaded(ArrayOfByte.equals("y"));
 	}
   
 	public void ChooseBox(int paramInt)
@@ -174,9 +174,9 @@ public class Fac_Manager
 		this.m_Data.clearDevices();
 	}
   
-	/*public boolean Connect(int paramInt)
+	/*public boolean Connect(int Int)
 	{
-		BluetoothDevice localBluetoothDevice = this.m_Data.getDevice(paramInt);
+		BluetoothDevice localBluetoothDevice = this.m_Data.getDevice(Int);
 		if (this.myBluetoothAdapter.isDiscovering()) {
 			this.myBluetoothAdapter.cancelDiscovery();
     }
@@ -201,21 +201,21 @@ public class Fac_Manager
     }
   }
   */
-  public void ConnectionDone(byte[] paramArrayOfByte)
+  public void ConnectionDone(byte[] ArrayOfByte)
   {
-	  String str = new String(paramArrayOfByte);
+	  String str = new String(ArrayOfByte);
 	  if (this.m_Connect != null) {
-//		  ((Connect)this.m_Connect).ConnectionDone(paramArrayOfByte.equals("y"));
+//		  ((Connect)this.m_Connect).ConnectionDone(ArrayOfByte.equals("y"));
 	  }
-	  ((MainActivity)this.m_context).ConnectionDone(paramArrayOfByte.equals("y"));
-	  if (paramArrayOfByte.equals("y")) {
+	  ((MainActivity)this.m_context).ConnectionDone(ArrayOfByte.equals("y"));
+	  if (ArrayOfByte.equals("y")) {
 		  this.m_com.getSoundCreatorVersion();
 	  }
   }
   
-  public void Debug(byte[] paramArrayOfByte)
+  public void Debug(byte[] ArrayOfByte)
   {
-	  ByteBuffer bytebuffer = ByteBuffer.wrap(new byte[] { paramArrayOfByte[0], paramArrayOfByte[1], paramArrayOfByte[2], paramArrayOfByte[3] });
+	  ByteBuffer bytebuffer = ByteBuffer.wrap(new byte[] { ArrayOfByte[0], ArrayOfByte[1], ArrayOfByte[2], ArrayOfByte[3] });
 	  bytebuffer.order(ByteOrder.LITTLE_ENDIAN);
 	  ((MainActivity)this.m_context).Debug(bytebuffer.getInt());
   }

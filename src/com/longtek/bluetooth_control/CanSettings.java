@@ -44,16 +44,13 @@ public class CanSettings extends Activity {
 	private TextView CanThrottle;		//油门开度
 	private TextView CcgFile_tv;
 	private ToggleButton m_SpyOnOff;		//数据开关
-	
 	private Connect m_Connect;
 	private Fac_Manager m_Manager;
 	public static final int FILE_SELECT_CODE = 1000;    //选择文件 请求码
 	public static final String SEND_FILE_NAME = "MG GT.ccg";
 	private static final String BASEDIR = "SoundCreator";
 	private String CcgFileName;
-	private Connect m_connect;
 	private byte[] m_CcgBytes;
-	public BluetoothSocket _socket;
 	private String m_CcgName;
 	boolean isConnected = true;
 	private String path;
@@ -79,20 +76,38 @@ public class CanSettings extends Activity {
 		@Override
 		public void onClick(View arg0) {
 			// TODO Auto-generated method stub
-			if(!CanSettings.this.m_Manager.IsConnected())
+			if(!CanSettings.this.IsConnected())
 			{
-				((MainActivity) CanSettings.this.m_Manager.getM_Connect()).PleaseDoConnection();
+				CanSettings.this.PleaseDoConnection();
 				CanSettings.this.m_SpyOnOff.setChecked(false);
 				return ;
 			}
 			if (CanSettings.this.m_SpyOnOff.isChecked())
 			{
-				CanSettings.this.m_Manager.SpyOn();
+				CanSettings.this.SpyOn();
 				return ;
 			}
-			CanSettings.this.m_Manager.SpyOff();
+			CanSettings.this.SpyOff();
 		}
 	};
+	
+	public boolean IsConnected()
+  	{
+  		return ( (((Connect) this.getConnect()).getBtSocket() != null) && (((Connect) this.getConnect()).getBtSocket().isConnected()));
+  	}
+	
+	private void SpyOn()
+	{
+		Message msg = CanSettings.this.m_Connect.handler.obtainMessage();
+		CanSettings.this.m_Connect.handler.sendMessage(msg);
+	}
+	
+	private void SpyOff()
+	{
+		CanRPM.setText(" ");
+		CanSpeed.setText(" ");
+		CanThrottle.setText(" ");
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +117,7 @@ public class CanSettings extends Activity {
 		
 		init();
 		this.CANSettings.setOnClickListener(this.OnCANSettings);
-//		this.m_SpyOnOff.setOnClickListener(OnSpyOnOff);         //存在异常
+		this.m_SpyOnOff.setOnClickListener(OnSpyOnOff);         
 		this.m_Manager = Fac_Manager.getManager();
  
 	}
@@ -357,30 +372,30 @@ public class CanSettings extends Activity {
 		//通过菜单项的ID响应每个菜单
 				switch (item.getItemId())
 				{
-				case R.id.menu_home:
-					GoHome();
-					break;
+//				case R.id.menu_home:
+//					GoHome();
+//					break;
 				case R.id.menu_connnection:
 					Launch_Connection();
 					break;
-				case R.id.menu_demo:
-					Launch_Demo();
-					break;
-				case R.id.menu_boxsettings:
-					Launch_BoxSettings();
-					break;
-				case R.id.menu_cansettings:
-					Launch_CanSettings();
-					break;
-				case R.id.menu_help:
-					Launch_Help();
-					break;
-				case R.id.menu_about:
-					Launch_About();
-					break;
-				case R.id.menu_logs:
-					Launch_Logs();
-					break;
+//				case R.id.menu_demo:
+//					Launch_Demo();
+//					break;
+//				case R.id.menu_boxsettings:
+//					Launch_BoxSettings();
+//					break;
+//				case R.id.menu_cansettings:
+//					Launch_CanSettings();
+//					break;
+//				case R.id.menu_help:
+//					Launch_Help();
+//					break;
+//				case R.id.menu_about:
+//					Launch_About();
+//					break;
+//				case R.id.menu_logs:
+//					Launch_Logs();
+//					break;
 				default:
 					return super.onOptionsItemSelected(item);		//对没有处理的事件交给父类处理
 				}
@@ -415,7 +430,7 @@ public class CanSettings extends Activity {
 				try {
 					Log.i("----------------", "准备发送文件...");
 					sendCcgFile();
-//					sendDataToPairedDevice(CcgBuffer, ((Connect)this.m_connect)._device);
+//					sendDataToPairedDevice(CcgBuffer, CanSettings.this.m_Connect._device);
 					Toast.makeText(this, R.string.TransferComplete, 0).show();       //提示加载成功
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -432,29 +447,30 @@ public class CanSettings extends Activity {
   	 */
   	public void sendCcgFile()  
   	{
-  		 
-    	Log.d("--------------------", "开始打开输出流");
-				try {
-//					if(!((Connect)this.m_connect).IsConnected())
+  		byte[] ccg = CcgBuffer.getBytes();
+  		System.out.println("开始打开输出流");
+  			try {
 //					if(!IsConnected())
-//					{
-//						Log.d("-----------------------", "重新连接蓝牙！");
+//					{ 
+//						System.out.println("请重新连接蓝牙！");
 //						PleaseDoConnection();
 //					}else{
-						OutputStream os = ((Connect)this.m_connect)._socket.getOutputStream();    //空指针异常
-						byte[] ccg  = CcgBuffer.getBytes("utf-8");
-//						byte[] ccg  = sb.toString().getBytes("utf-8");
-						os.write(ccg);          //写入流
+//						Connect m_Connect = new Connect();
+//						OutputStream os = m_Connect.getBtSocket().getOutputStream();    
+						OutputStream os = this.getConnect().getBtSocket().getOutputStream();    
+						
+						os.write(ccg);         
 						os.flush();
-						Log.d("-------------------------------", "发送文件中.....");
+						System.out.println("正在发送文件.....");
 						//关闭输出流，关闭Socket
 						os.close();
-						_socket.close();
+						this.getConnect().getBtSocket().close();
 						
 						Log.d("Ccg文件已发送", ccg.toString());
 //					}
 				} catch (Exception e) {
 					e.printStackTrace();
+					 System.out.println("呃哦！！发送失败了！");
 				}
 				
 //    		 while (true)
@@ -539,7 +555,7 @@ public class CanSettings extends Activity {
 	
   	public void LoadCcg(Uri uri)
   	{
-  		if(!((Connect)this.m_connect).IsConnected())
+  		if(!((Connect)this.m_Connect).IsConnected())
   		{
   			PleaseDoConnection();
   		}
@@ -585,9 +601,14 @@ public class CanSettings extends Activity {
   		this.m_CcgName = string;
   	}
   	
-  	public boolean IsConnected()
+  	public Connect getConnect()
   	{
-  		return (this._socket != null) && (this._socket.isConnected());
+  		return m_Connect;    //返回Connect对象，用来拿Connect对象中的变量
   	}
-     
+  	
+  	public void setConnect(Connect m_Connect)
+  	{
+  		this.m_Connect = m_Connect;
+  	}
+  	
 }

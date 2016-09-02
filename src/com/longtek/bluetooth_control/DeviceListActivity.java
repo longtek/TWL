@@ -56,13 +56,13 @@ public class DeviceListActivity extends Activity {
         setResult(Activity.RESULT_CANCELED);
 
         // 查找设备响应
-      /*  Button scanButton = (Button) findViewById(R.id.button_scan);
+      Button scanButton = (Button) findViewById(R.id.button_scan);
         scanButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 doDiscovery();
                 v.setVisibility(View.GONE);
             }
-        });*/
+        });
         
         // 初使化设备存储数组
         mPairedDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
@@ -133,7 +133,8 @@ public class DeviceListActivity extends Activity {
     private void doDiscovery() {
         if (D) Log.d(TAG, "doDiscovery()");
 
-        // 在窗口显示查找中信息
+        // 在窗口显示查找中信息	
+        
         setProgressBarIndeterminateVisibility(true);
         setTitle("查找设备中...");
 
